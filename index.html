@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<title>GFD-Net</title>
+
+		<link rel="stylesheet" href="styles.css">
+		<script src="main.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<!--[endif]-->
+	</head>
+	<body>
+		<header>
+			<img id="logo" src="images/GFDNetLogo.png" alt="GFD-Net">   
+			<a id="go-top" href="#" title="Back to Top"><img src="images/arrow-down.png"/></a>
+		</header>
+		<div id="menu-wrapper">
+			<p>Cytoscape app for visualizing and analyzing the functional similarity of gene networks</p>
+			<ul>
+				<li> <a class="button download">Download </a></li>
+					<ul class = "dropDownList cf closed">
+						<li><a class="button" href="http://apps.cytoscape.org/download/gfdnet/1.1">App (v. 3.x)</a></li>
+						<li><a class="button" href="http://chianti.ucsd.edu/cyto_web/plugins/pluginjardownload.php?id=560">Plugin (v. 2.x)</a></li>
+						<li><a class="button" href="files/User%20Manual.pdf" target="_blank">User Manual</a></li>
+				</ul>
+				<li><a class="button github" href="https://github.com/nbidiaz/GFD-Net">View On GitHub</a></li>
+			</ul>
+		</div>
+
+		<section>
+			<h1>What is GFD-Net</h1>
+
+			<p>GFD-Net is a Cytoscape app designed to visualize and analyze the functional dissimilarity of gene networks. GFD-Net can analyze a gene network based on Gene Ontology (GO) and calculate a quantitative measure of its functional dissimilarity, i.e. a quantitative value of the degree of dissimilarity between the connected genes in it.</p>
+
+			<p>After the analysis, users can visualize the information retrieved from GO.</p>
+			<ul>
+				<li>For each gene the user can see its associated GO terms and its function (specified by a GO term) chosen as the most cohesive function in the set.</li>
+				<li>For each edge the user can see the genes at its ends, the function chosen as the most cohesive function in the set for each one and the dissimilarity between them.</li>
+			</ul>
+
+			<img src="images/ResultPanel.png" alt="ResultPanel">
+
+			<h1>What is it useful for</h1>
+
+			<p>GFD-Net provides researchers with an easy way to validate their inferred networks and find out in which way the genes in a network are related to each other. Such information helps finding high functionally related subsets as well as the concrete function of a specific gene in a given network</p>
+
+			<h1>How does it work</h1>
+
+			<p>GFD-Net is based on an adaptation of the GFD approach presented in <a href="http://www.biomedcentral.com/1471-2105/12/360">Díaz Díaz and Aguilar Ruiz, 2011</a> which uses the prior biological knowledge contained in GO to establish the quality of of gene sets. In this type of measure, it is considered that absolutely all the genes are related to each other disregarding the possibly that some of them may be related while others may be not. On the other hand, GFD-Net assumes that all the genes on the same network are involved in the same biological process. This means that these genes may have different functions, but they have been put together on the same network because they are somehow related in a biological sense (Biological Process, Molecular Function, Cellular Component) and takes into account only the genes directly
+				related to each other i.e. connected by an edge.</p>
+
+			<p>The analysis is performed in four steps (click on them to read more):</p>
+			<ul id="list-steps">
+				<li>
+					<h3 id="step1">Configure parameters</h3>
+					<div class="step1">
+						<p>GFD-Net needs three parameters in order to run.</p>
+						<p>First, it is ontology-specific so before the algorithm can be run, an ontology must be selected.</p>
+						<p>It also focuses on the information related to a specific organism so it is necessary to choose the rganism which the network being analyzed belongs to. The user is allowed to select one of the main organisms or to search through all the organisms in GO. We realized that some users run GFD-Net in a big set of networks belonging to the same organism, so we included the option to preload it. Preloading an organism loads in memory all the existing genes for the chosen organism as well as the entire section GO-tree related to it. This option takes a few minutes but speeds the overall process when multiple networks are going to be analyzed, allowing the user to run GFD-Net several times without having to reload the GO-tree.</p>
+						<p>Finally, it is necessary to configure the connection to the Gene Ontology database (url, user and password). GFD supports user setups (locally or on a server) of the database or the one hosted by EBI.</p>
+					</div>
+				</li>
+				<li>
+					<h3 id="step2">Load the network</h3>
+					<div class="step2">
+						<p>An important advantage of the integration of GFD-Net in Cytoscape is that we can use any network extracted by any of its app, or in a format readable by it. The structures that Cytoscape provides to hold the network information was not rich enough for our needs, so we decided to use our own optimized structure for searching and quick access.</p>
+						<p>The first step is to parse the current Cytoscape network in our structure and store it in memory. This process finds the genes in Gene Ontology, deals with synonyms if they are used and retrieves the associated gene product according to the Entrez database. All the genes that cannot be found in Gene Ontology or do not have any annotation in the selected ontology and organism are removed from the network. If the organism was preloaded, the genes are set as GO-tree leaves \cite{DiazDiaz01}, linking each gene with the related terms in the GO-tree. If the organism was not preloaded, the necessary section of the GO-tree is built by using the genes as leaves and expanding the tree all the way to the root.</p>
+						<p>Having this structure which partly duplicates the Cytoscape network is useful because the genes that are removed when using a specific ontology might be present if the ontology is changed. For this reason, the genes views in the Cytoscape network view are hidden but never removed, so if the user changes the ontology or the organism, they are still there and GFD-Net can still load them. To allow the user change the network and avoid synchronization issues between the GFD-Net structure and the Cytoscape network if the user decides to modify or close it, GFD-Net offers a way to re-load a network.</p>
+					</div>
+				</li>
+				<li>
+					<h3 id="step3">Analyze the network</h3>
+					<div class="step3">
+						<p>During the network load, GFD-Net has already identified the genes, identified the gene products that each gene codifies and loaded all the necessary GO-term as well as the necessary section of the GO-Tree.</p>
+						<p>Each protein can be associated with or located in one or more cellular component and be active in one or more biological processes where it can perform several molecular functions, where each annotation is represented in GO by a GO-term. GFD-Net then computes all the possible combinations of GO-terms associated to each gene in the network. Unfortunately, the time consumed by the analysis grows exponentially with the size of the network making an exhaustive search impossible to perform in a reasonable amount of time for large networks. In order to overcome this limitation GFD-Net uses a heuristic approach based on Voronoi diagrams which uses the GO-Tree as search space. For each node in the search space, GFD-Net searches for the closest representation of each gene in the network and calculates the functional dissimilarity of the whole network. The search is done using a multithread approach in order to exploit as much as possible the full potential of the computer running the analysis.</p>
+						<p>Once the most cohesive set of functions is found, i.e. the set that results in a smaller dissimilarity value, each edge is weighted by the dissimilarity between the selected GO-terms for the nodes at each end, and the whole network is weighted by the average of the edge weights. Both the weights and the network dissimilarity value range from 0 to 1, where 0 and 1 represent the best and the worst values respectively.</p>
+					</div>
+				</li>
+				<li>
+					<h3 id="step4">Display the results</h3>
+					<div class="step4">
+						<p>To facilitate the user interaction with the information retrieved, a result panel is displayed on the right allowing the user to visualize all the obtained information by simply interacting with the network or the panel itself. The results are displayed in a way that allows the user to get general information about the network or more specific information about each relationship or gene.</p>
+						<p>By default, this result panel displays the genus, specie and ontology that the algorithm used, the dissimilarity value obtained for the whole network and the list of edges (pairs gene-gene) of the network ranked by dissimilarity. This ranking allows the filtering of the most cohesive subsets in the network or the filtering of the nodes that doesn’t seem to belong to the network. It also helps identifying the overall function of the whole network and how the nodes are related to each other.</p>
+ 						<p>Clicking on any row of that list or on an edge of the network, the panel displays the name of the genes at each end of the edge, the go-term selected by each one and the dissimilarity between them, providing more information about how the genes are related and the goodness of such relationship.</p>
+						<p>Finally, clicking on one of the gene names or on a node of the network displays the list of possible GO-terms for the selected gene and highlights the one selected by GFD-Net as most cohesive for the network, providing more information about the different annotations on the gene. Clicking on any GO- term opens its details on amigo \cite{amigo}.org using the default browser.</p>
+					</div>
+				</li>
+			</ul> 
+
+			<p>It should be taken into consideration that GFD-Net is oriented to connect networks where most of the genes are contained in the ontology being used. This is because all the genes that cannot be found are removed from the network and the dissimilarity between disconnected nodes is not calculated. The more genes that are removed or pairs that are disconnected, the less reliable the results will be.</p>
+
+			<h1>How to use it</h1>
+
+			<p>All the information about installation and use of GFD-Net can be found in the User Manual using the Downlaod button or clicking <a href="files/User%20Manual.pdf" target="_blank">here</a></p>
+
+			<h1>Authors and Contributors</h1>
+			<ul>
+				<li>Juan José Díaz Montaña (<a href="https://github.com/juanjoDiaz" class="user-mention">@juanjoDiaz</a>) designed and implemented GFD-Net</li>
+				<li>Norberto Díaz Díaz (<a href="https://github.com/nbidiaz" class="user-mention">@nbidiaz</a>) conceived the idea and supervised the project</li>
+				<li>Isabel A Nepomuceno-Chamorro Helped with the experimentation</li>
+				<li>Francisco A. Gómez Vela (<a href="https://github.com/fgomezvela" class="user-mention">@fgomezvela</a>) Helped with the experimentation</li>
+			</ul>
+
+			<h1>Support or Contact</h1>
+
+			<p>In case of having any trouble with the app, check out the User Manual. If your problem is not solved you can contact <a href="mailto:ndiaz@upo.es">ndiaz@upo.es</a> and we'll try to help you as soon as possible.</p>
+		</section>
+		<footer>
+			<p>This project is maintained by <a href="https://github.com/nbidiaz">nbidiaz</a> and <a href="https://github.com/juanjoDiaz">juanjoDiaz</a></p>
+		</footer>
+	</body>
+</html>
