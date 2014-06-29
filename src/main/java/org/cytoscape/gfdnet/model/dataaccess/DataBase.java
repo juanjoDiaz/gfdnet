@@ -99,8 +99,6 @@ public class DataBase {
             System.err.println("Error in the execution of the SQL query'.\n" + e2);
         }
         opsCount++;
-        closeConnection();
-
         return res;
     }
 
@@ -151,8 +149,6 @@ public class DataBase {
             System.err.println("Error in the execution of the SQL stored procedure.\n" + e2);
         }
         opsCount++;
-        closeConnection();
-
         return res;
     }
 }
