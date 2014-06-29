@@ -134,7 +134,6 @@ public class GeneDAO {
                 
                 gene.addGeneProduct(geneProduct);                
             }
-            rs.close();
         } catch (SQLException ex) {
             Logger.getLogger(GeneDAO.class.getName()).log(Level.SEVERE, null, ex);
         }

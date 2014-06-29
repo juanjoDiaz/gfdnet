@@ -17,7 +17,7 @@ public class GFDnetSimilarityUtils extends SimilarityUtils{
     public static BigDecimal getSimilarity(Graph<GeneInput> network, List<Representation> representations, int version) {
          switch (version) {
              case 1:
-                 return SimilarityUtils.getSimilarity(representations);
+                 return getSimilarity(representations);
              case 2:
                  return getSimilarityNoPenalizing(network, representations);
              default:
@@ -37,7 +37,7 @@ public class GFDnetSimilarityUtils extends SimilarityUtils{
                 for (int j = i + 1; j < representationsSize; j++) {
                     Representation rep2 = representations.get(j);
                     if (network.areConnected(rep1.getGen().getNodeId(), rep2.getGen().getNodeId())){
-                        similarity = similarity.add(SimilarityUtils.getSimilarity(rep1, rep2));
+                        similarity = similarity.add(getSimilarity(rep1, rep2));
                         cont++;
                     }
                 }
@@ -61,7 +61,7 @@ public class GFDnetSimilarityUtils extends SimilarityUtils{
                 Representation rep1 = representations.get(i);
                 for (int j = i + 1; j < representationsSize; j++) {
                     Representation rep2 = representations.get(j);
-                    BigDecimal nodesSimilarity = SimilarityUtils.getSimilarity(rep1, rep2);
+                    BigDecimal nodesSimilarity = getSimilarity(rep1, rep2);
                     if (network.areConnected(rep1.getGen().getNodeId(), rep2.getGen().getNodeId())){
                         similarity = similarity.add(nodesSimilarity);
                     }
@@ -104,7 +104,7 @@ public class GFDnetSimilarityUtils extends SimilarityUtils{
                         GeneInput g2 = network.getNode(j);
                         Representation r1 = g1.getRepresentationSelected();
                         Representation r2 = g2.getRepresentationSelected();
-                        r = SimilarityUtils.getSimilarity(r1, r2);
+                        r = getSimilarity(r1, r2);
                         network.setEdgeWeight(i, j, r);
                         sum = sum.add(r);
                         cont++;

@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.List;
 
 /**
- *
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Norberto Díaz-Díaz
  * @author Juan José Díaz Montaña
  */

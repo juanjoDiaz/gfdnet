@@ -18,9 +18,10 @@ public class GOUtils {
     /**
      * Receives a graph containing gene names as nodes and return a equivalent graph containing genes
      * 
-     * @param geneNamesNetwork
-     * @param genes
-     * @return 
+     * @param network
+     * @param organism
+     * @param ontology
+     * @return Graph formed by the genes retrieved from GO
      */
     public static Graph<GeneInput> getGenInputNetwork(Graph<String> network, Organism organism, String ontology){
         List<String> nodes = network.getNodes();
@@ -58,9 +59,10 @@ public class GOUtils {
     /**
      * Receives a list containing gene names and return a equivalent list containing genes
      * 
-     * @param geneNamesNetwork
-     * @param genes
-     * @return 
+     * @param geneNames List of gene names
+     * @param organism
+     * @param ontology
+     * @return List of genes extracted from GO
      */
     public static List<GeneInput> getGenInputs(List<String> geneNames, Organism organism, String ontology){
         List<GeneInput> genes;

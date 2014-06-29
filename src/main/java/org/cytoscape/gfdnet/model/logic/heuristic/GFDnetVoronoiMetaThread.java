@@ -26,7 +26,7 @@ public class GFDnetVoronoiMetaThread extends Thread {
     private final List<Representation> treeNodes;
     private final Graph<GeneInput> network;
     private final int version;
-    private List<Representation> usedRepresentations;//Lista de las representaciones que conforman la solucion
+    private List<Representation> usedRepresentations;
     private BigDecimal lowestDissimilarity = BigDecimal.valueOf(Float.MAX_VALUE);
 
     
