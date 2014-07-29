@@ -2,9 +2,7 @@ package org.cytoscape.gfdnet.model.businessobjects.go;
 
 import java.util.Collections;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import org.cytoscape.gfdnet.model.dataaccess.go.GoTermDAO;
-import org.cytoscape.gfdnet.model.logic.utils.Cache;
 
 /**
  *
@@ -15,13 +13,12 @@ public class GeneProduct implements Comparable {
 
     private final Integer id;
     private final String description;
-    private final SortedSet<GoTerm> goTerms;
-    public String locadedOntology;
+    private SortedSet<GOTerm> goTerms;
+    public String loadedOntology;
 
     public GeneProduct(Integer id, String description) {
         this.id = id;
         this.description = description;
-        this.goTerms = new TreeSet();
     }
     
     public Integer getId() {
@@ -32,27 +29,12 @@ public class GeneProduct implements Comparable {
         return description;
     }
     
-    public SortedSet<GoTerm> getGoTerms(String ontology) {
-        if (goTerms.isEmpty() ){
-            loadGoTerms(ontology);
+    public SortedSet<GOTerm> getGoTerms(String ontology) {
+        if (goTerms == null || !(this.loadedOntology == null ? ontology == null : this.loadedOntology.equals(ontology))){
+            loadedOntology = ontology;
+            goTerms = GoTermDAO.getGoTerms(id, ontology);
         }
         return Collections.unmodifiableSortedSet(goTerms);
-    }
-
-    private void loadGoTerms(String ontology){
-        SortedSet<GoTerm> goTermsAux = GoTermDAO.getGoTerms(id, ontology);       
-        for (GoTerm gt : goTermsAux){
-            GoTerm cachedGT = Cache.getGoTerm(gt);
-            if(cachedGT != null){
-                goTerms.add(cachedGT);
-            } else {
-                goTerms.add(gt); 
-                if(!gt.isRoot()){
-                    gt.loadAncestors();
-                }
-                Cache.addGoTerm(gt);
-            }
-        }
     }
         
     @Override

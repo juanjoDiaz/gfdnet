@@ -4,8 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cytoscape.gfdnet.model.dataaccess.DataBase;
 
 /**
@@ -15,52 +13,59 @@ import org.cytoscape.gfdnet.model.dataaccess.DataBase;
  */
 public class OrganismDAO {
     public static boolean isValid(String genus, String species){
+        DataBase.openConnection();
+        String sql = "SELECT * FROM species " +
+                "WHERE genus= \"" + genus + "\" " +
+                "AND species= \"" + species + "\" LIMIT 1";
         boolean exists = false;
-        String sql="SELECT * FROM species "
-                + "WHERE genus= \"" + genus + "\" "
-                + "AND species= \"" + species + "\" LIMIT 1";
         ResultSet rs = DataBase.executeQuery(sql);
         try {
             exists = rs.next();
-        } catch (SQLException ex) {
-            Logger.getLogger(RelationshipDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            System.err.println("Error while validating organism on the database.\n" + e.getMessage());
         }
-        DataBase.closeConnection(rs);
-
+        finally {
+            DataBase.closeQuery(rs);
+            DataBase.closeConnection();
+        }
         return exists;
     }
     
     public static List<String> getGenera(){
+        DataBase.openConnection();
+        String sql="SELECT s.genus AS genus FROM species s GROUP BY s.genus ORDER BY s.genus;";
         List<String> genus = new ArrayList();
-
-        String sql="select s.genus AS genus from species s group by s.genus order by s.genus;";
-        ResultSet rs=DataBase.executeQuery(sql);
+        ResultSet rs = DataBase.executeQuery(sql);
         try {
             while (rs.next()) {
                 genus.add(rs.getString("genus"));
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(RelationshipDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            System.err.println("Error while retrieving all existing genera from the database.\n" + e.getMessage());
         }
-        DataBase.closeConnection(rs);
-
+        finally {
+            DataBase.closeQuery(rs);
+            DataBase.closeConnection();
+        }
         return genus;
     }
 
     public static List<String> getSpeciesFromGenus(String genus){
-         List<String> species = new ArrayList();
-
-        String sql="SELECT species FROM species s where genus=\""+genus+"\" order by species;";
-        ResultSet rs=DataBase.executeQuery(sql);
+        DataBase.openConnection();
+        String sql = "SELECT species FROM species s WHERE genus=\""+genus+"\" ORDER BY species;";
+        List<String> species = new ArrayList();
+        ResultSet rs = DataBase.executeQuery(sql);
         try {
             while (rs.next()) {
                 species.add(rs.getString("species"));
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(RelationshipDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            System.err.println("Error while retrieving all " + genus + " species from the database.\n" + e.getMessage());
         }
-        DataBase.closeConnection(rs);
-
+        finally {
+            DataBase.closeQuery(rs);
+            DataBase.closeConnection();
+        }
         return species;
     }
 }

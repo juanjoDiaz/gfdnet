@@ -1,11 +1,10 @@
 package org.cytoscape.gfdnet.model.businessobjects;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.businessobjects.go.Gene;
-import org.cytoscape.gfdnet.model.businessobjects.go.GoTerm;
 import org.cytoscape.gfdnet.model.businessobjects.go.Relationship;
 
 /**
@@ -15,12 +14,10 @@ import org.cytoscape.gfdnet.model.businessobjects.go.Relationship;
  */
 public class GeneInput extends Gene{
     private int nodeId;
-    private final List<Representation> representations;
-    private String loadedOntology;
+    private List<Representation> representations;
     
     public GeneInput(String name) {
         super(name);
-        representations = new LinkedList<Representation>();
     }
     
     public GeneInput(String name, int nodeId) {
@@ -32,23 +29,10 @@ public class GeneInput extends Gene{
     public boolean isKnown(String ontology){
         return !getRepresentations(ontology).isEmpty();
     }
-    
-    public String getLoadedOntology(){
-        return loadedOntology;
-    }
-    
-    public List<Representation> getRepresentations(){
-        if(representations.isEmpty() || loadedOntology == null){
-            throw new InternalError("No ontology has been loaded.");
-        }
-        return Collections.unmodifiableList(representations);
-    }
 
     public List<Representation> getRepresentations(String ontology){
-        if(representations.isEmpty() || !loadedOntology.equals(ontology)){
-            loadedOntology = ontology;
-            representations.clear();
-            representations.addAll(loadRepresentations(ontology));
+        if(representations == null || !(this.loadedOntology == null ? ontology == null : this.loadedOntology.equals(ontology))){
+            representations = loadRepresentations(ontology);
         }
         return Collections.unmodifiableList(representations);
     }
@@ -76,32 +60,27 @@ public class GeneInput extends Gene{
     }
     
     private List<Representation> loadRepresentations(String ontology){
-        List<Representation> representaciones = new ArrayList();
-        for (GoTerm goTerm : getGoTerms(ontology)) {
+        List<Representation> representationList = new LinkedList();
+        for (GOTerm goTerm : getGoTerms(ontology)) {
             Representation representacion = new Representation(goTerm, this);
-            createRepresentations(goTerm, representacion, representaciones);
+            createRepresentations(goTerm, representacion, representationList);
         }
-        return representaciones;
+        return representationList;
     }
     
-    private static void createRepresentations(GoTerm goTermPadre, Representation r, List<Representation> representaciones) {
-        r.addNode(goTermPadre);
-        if (!goTermPadre.isRoot()) {
-        List<Relationship> relacionesAncestrales=new ArrayList();
-            for(Relationship relation : goTermPadre.getAncestors()) {
-                if(relation.getRelationshipType().equals(Relationship.is_a)) {
-                    relacionesAncestrales.add(relation);
+    private static void createRepresentations(GOTerm parentGOTerm, Representation r, List<Representation> representations) {
+        r.addNode(parentGOTerm);
+        if (!parentGOTerm.isRoot()) {
+            List<Relationship> ancestors = parentGOTerm.getAncestors();
+            if (ancestors.size() == 1) {
+                createRepresentations(ancestors.get(0).getGoTerm(), r, representations);
+            } else {
+                for(Relationship ancestor : ancestors) {
+                    createRepresentations(ancestor.getGoTerm(),(Representation)r.clone(),representations);
                 }
-            }
-            if (relacionesAncestrales.size() > 1) {
-                for(Relationship relation:relacionesAncestrales) {
-                    createRepresentations(relation.getGoTerm(),(Representation)r.clone(),representaciones);
-                }
-            } else if (relacionesAncestrales.size() == 1) {
-                createRepresentations(relacionesAncestrales.get(0).getGoTerm(), r, representaciones);
             }
         } else {
-            representaciones.add(r);
+            representations.add(r);
         }
     }
     

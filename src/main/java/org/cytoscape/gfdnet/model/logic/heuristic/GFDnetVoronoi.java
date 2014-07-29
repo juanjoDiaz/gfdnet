@@ -1,32 +1,40 @@
 package org.cytoscape.gfdnet.model.logic.heuristic;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
+import org.cytoscape.gfdnet.model.businessobjects.GOTreeNode;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
+import org.cytoscape.gfdnet.model.businessobjects.ProgressMonitor;
 import org.cytoscape.gfdnet.model.businessobjects.Representation;
+import org.cytoscape.gfdnet.model.logic.GFDnet;
 import org.cytoscape.gfdnet.model.logic.utils.GOTreeUtils;
-import org.cytoscape.work.TaskMonitor;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
-public class GFDnetVoronoi {
+public class GFDnetVoronoi extends GFDnet{
 
-    private int metaThreads = 4;
-    private int threadsExecuted = 0;
+    private int numCores = Runtime.getRuntime().availableProcessors();
     
-    private TaskMonitor tm;
+    private int currentThread = 0;
+    private int executedThreadCount = 0;
+    
+    private List<Representation> usedRepresentations;
+    private BigDecimal lowestDissimilarity = BigDecimal.valueOf(Float.MAX_VALUE);
+
     private int progress = 0;
     private int treeNodesSize;
         
     public synchronized void incProgress() {
         progress++; 
-        tm.setProgress((double)progress/treeNodesSize);
+        pm.setProgress((float)progress/treeNodesSize);
+    }
+    
+    public GFDnetVoronoi(ProgressMonitor pm) {
+        super(pm);
     }
 
     /**
@@ -40,52 +48,47 @@ public class GFDnetVoronoi {
      * @param version
      * @return The MethaThread that got the best result
      */
-    public GFDnetResult evaluateRepresentations(Graph<GeneInput> network, String ontology, int version, TaskMonitor tm) {
-        this.tm = tm;
-        List<Representation> treeNodes = GOTreeUtils.getNodes(network, ontology);
-        
+    @Override
+    public GFDnetResult evaluateRepresentations(Graph<GeneInput> network, String ontology, int version) {
+        List<GOTreeNode> treeNodes = GOTreeUtils.getNodes(network, ontology);      
         treeNodesSize = treeNodes.size();
-        int metaThreadSize = treeNodesSize / metaThreads;
-        List<GFDnetVoronoiMetaThread> mts = new ArrayList<GFDnetVoronoiMetaThread>(metaThreads);
-        for (int i = 0; i < metaThreads; i++){
-            int end = (i+1) * metaThreadSize;
-            end = end > treeNodesSize ? treeNodesSize : end;
-            GFDnetVoronoiMetaThread mt = new GFDnetVoronoiMetaThread(treeNodes.subList(i, end), network, version, this);
-            mts.add(mt);
-        }
-        for(GFDnetVoronoiMetaThread mt : mts){
-            mt.start();
-        }        
-        waitToCompletelyExecute();
-        threadsExecuted = 0;
-
-        GFDnetVoronoiMetaThread bestMt = null;
-        for (GFDnetVoronoiMetaThread mti : mts){
-            if (bestMt == null || bestMt.getBestSpecificity().compareTo(mti.getBestSpecificity()) > 0) {
-                bestMt = mti;
+        
+        synchronized (this) {
+            while (executedThreadCount + currentThread < treeNodesSize) {
+                if (isInterrupted){
+                    return null;
+                }
+                if ((numCores > currentThread)) {
+                    currentThread++;
+                    GOTreeNode centralNode = treeNodes.get(executedThreadCount + currentThread - 1);
+                    new GFDnetVoronoiThread(this, network, ontology, centralNode, version).start();
+                    incProgress();
+                } else {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        System.err.println("Error while waiting for a threads.\n" + e.getLocalizedMessage());
+                    }
+                }
             }
         }
-
-        for(Representation representation : bestMt.getUsedRepresentations()) {
+        
+        for(Representation representation : usedRepresentations) {
             representation.setSelected(true);
         }
+
         GFDnetResult result = new GFDnetResult(ontology, network);
         System.gc();
         return result;
     }
 
-    private synchronized void waitToCompletelyExecute() {
-        while (threadsExecuted < metaThreads) {
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(GFDnetVoronoi.class.getName()).log(Level.SEVERE, null, ex);
-            }
+    public synchronized void notifyThreadCompleted(BigDecimal dissimilarity, List<Representation> usedRepresentations) {
+        if (lowestDissimilarity.compareTo(dissimilarity) > 0) {
+            this.lowestDissimilarity = dissimilarity;
+            this.usedRepresentations = usedRepresentations;
         }
-    }
-
-    public synchronized void notifyMetaThreadCompleted() {
-        threadsExecuted++;
+        executedThreadCount++;
+        currentThread--;
         notify();
     }
 }

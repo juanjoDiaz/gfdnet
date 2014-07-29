@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.go.GeneProduct;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
@@ -89,10 +87,12 @@ public class GeneDAO {
                 gene.addSynonym(synonym);
                 gene.addGeneProduct(geneProduct);                
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(GeneDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            System.err.println("Error while retrieving genes from the database.\n" + e.getMessage());
         }
-        DataBase.closeConnection(rs);
+        finally {
+            DataBase.closeResultSet(rs);
+        }
         
         return new LinkedList<GeneInput>(genes);
     }
@@ -134,10 +134,12 @@ public class GeneDAO {
                 
                 gene.addGeneProduct(geneProduct);                
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(GeneDAO.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            System.err.println("Error while retrieving genes from the database.\n" + e.getMessage());
         }
-        DataBase.closeConnection(rs);
+        finally {
+            DataBase.closeResultSet(rs);
+        }
 
         return genes;
     }

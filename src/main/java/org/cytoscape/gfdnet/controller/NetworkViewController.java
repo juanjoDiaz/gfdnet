@@ -32,7 +32,7 @@ public final class NetworkViewController {
     public NetworkViewController() throws Exception{
         networkView = OSGiManager.getCyApplicationManager().getCurrentNetworkView();
         if (networkView == null){
-            throw new Exception("A valid network should be loaded.");
+            throw new Exception("A valid network view should be loaded.");
         }
     }
     

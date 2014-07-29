@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
-import org.cytoscape.gfdnet.model.dataaccess.go.GeneDAO;
+import org.cytoscape.gfdnet.model.businessobjects.ProgressMonitor;
 import org.cytoscape.gfdnet.model.dataaccess.go.OrganismDAO;
-import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.gfdnet.model.logic.utils.GOUtils;
 
 /**
  *
@@ -39,20 +39,11 @@ public class Organism {
         return Collections.unmodifiableSortedSet(genes);
     }
     
-    public void preloadGenes(String ontology, TaskMonitor tm){ 
-        tm.setTitle("Preloading " + genus + " " + species + "...");
+    public void preloadGenes(String ontology, ProgressMonitor pm){ 
         if (ontologyPreloaded == null || !ontologyPreloaded.equals(ontology)){
             ontologyPreloaded = ontology;
-            tm.setStatusMessage("Retrieving genes from GO");
-            genes = GeneDAO.getGenes(this);
-            int cont = 1;
-            int genesSize = genes.size();
-            for (Gene gene : genes){
-                tm.setStatusMessage("Loading " + gene.getName());
-                ((GeneInput)gene).isKnown(ontology);
-                tm.setProgress((double)cont/genesSize);
-                cont++;
-            }
+            pm.setStatus("Retrieving genes from GO");
+            genes = GOUtils.getGenInputs(this, ontology, pm);
         }
     }
     

@@ -3,6 +3,8 @@ package org.cytoscape.gfdnet.controller.tasks;
 import org.cytoscape.gfdnet.controller.CoreController;
 import org.cytoscape.gfdnet.controller.ToolBarController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
+import org.cytoscape.gfdnet.controller.utils.CytoscapeTaskMonitor;
+import org.cytoscape.gfdnet.model.businessobjects.ProgressMonitor;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
@@ -33,7 +35,9 @@ public class PreloadOrganismTask extends AbstractTask{
             toolbar.setOrganismButtonEnabled(false);
             toolbar.executeButtonEnabled(false);
             toolbar.refreshButtonEnabled(false);
-            organism.preloadGenes(ontology, tm);
+            tm.setTitle("Preloading " + organism.getGenus() + " " + organism.getSpecies() + "...");
+            ProgressMonitor pm = new CytoscapeTaskMonitor(tm);
+            organism.preloadGenes(ontology, pm);
             // TODO Change to observable task callback in 3.1
             if (!taskThread.isInterrupted()){
                 core.reset();

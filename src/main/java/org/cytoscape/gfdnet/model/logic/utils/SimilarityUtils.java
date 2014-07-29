@@ -4,8 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Stack;
+import org.cytoscape.gfdnet.model.businessobjects.GOTreeNode;
 import org.cytoscape.gfdnet.model.businessobjects.Representation;
-import org.cytoscape.gfdnet.model.businessobjects.go.GoTerm;
+import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -47,7 +48,7 @@ public class SimilarityUtils {
      * @param representations List of Representation
      * @return The specificity of the representations set
      */
-    public static BigDecimal getSimilarity(Representation rep1, Representation rep2) {
+    public static BigDecimal getSimilarity(GOTreeNode rep1, GOTreeNode rep2) {
         BigDecimal distance = new BigDecimal(getDistance(rep1.getPath(), rep2.getPath()));
         BigDecimal levels = new BigDecimal(rep1.getPath().size() + rep2.getPath().size());
         return distance.divide(levels,10,RoundingMode.HALF_UP);
@@ -64,16 +65,16 @@ public class SimilarityUtils {
      * @param pathGen2 Stack containing all the GO-Terms between a gene representation (a GO-Term) and the ontology root
      * @return The distance between the two GO-Term
      */
-    private static int getDistance(Stack<GoTerm> pathGen1, Stack<GoTerm> pathGen2) {
+    private static int getDistance(Stack<GOTerm> pathGen1, Stack<GOTerm> pathGen2) {
         int pathGen1Size = pathGen1.size();
         int pathGen2Size = pathGen2.size();
         if (pathGen1Size > pathGen2Size) {
-            Stack<GoTerm> aux = pathGen1;
+            Stack<GOTerm> aux = pathGen1;
             pathGen1 = pathGen2;
             pathGen2 = aux;
         }
         int cont = 0;
-        for (GoTerm gt1 : pathGen1) {
+        for (GOTerm gt1 : pathGen1) {
             int elementPosition = pathGen2.indexOf(gt1);
             if (elementPosition != -1) {
                 return cont + elementPosition + 1;

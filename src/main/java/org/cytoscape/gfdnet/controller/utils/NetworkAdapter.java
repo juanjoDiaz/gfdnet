@@ -17,7 +17,7 @@ public class NetworkAdapter {
         List<CyNode> nodes = network.getNodeList();
         List<CyEdge> edges = network.getEdgeList();        
         if (nodes.isEmpty() || edges.isEmpty()){
-            throw new IllegalArgumentException("A valid network should be loaded."); 
+            throw new IllegalArgumentException("The current network view seems to be empty."); 
         }
         Graph<String> g = new GraphImpl<String>(nodes.size());
         for(int i = 0; i < nodes.size(); i++){

@@ -6,14 +6,13 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.cytoscape.gfdnet.model.dataaccess.go.RelationshipDAO;
-import org.cytoscape.gfdnet.model.logic.utils.Cache;
 
 /**
  *
  * @author Norberto Díaz-Díaz
  * @author Juan José Díaz Montaña
  */
-public class GoTerm implements Comparable{
+public class GOTerm implements Comparable{
     private final int id;
     private final String name;
     private final String description;
@@ -23,7 +22,7 @@ public class GoTerm implements Comparable{
     private final List<Relationship> ancestors;
     private final List<Relationship> children;
 
-    public GoTerm(int id, String name, String description, String ontology) {
+    public GOTerm(int id, String name, String description, String ontology) {
         this.id=id;
         this.name = name;
         this.description=description;
@@ -45,28 +44,17 @@ public class GoTerm implements Comparable{
         return name;
     }
     
-    public void loadAncestors(){
-        List<Relationship> relations = RelationshipDAO.loadAncestors(id, ontology);
-        for(Relationship relation : relations){
-            GoTerm gtParent = relation.getGoTerm();
-            GoTerm cachedGTParent = Cache.getGoTerm(gtParent);
-            if(cachedGTParent != null){
-                relation.setGoTerm(cachedGTParent);
-            } else {
-                if (!gtParent.isRoot()){
-                    gtParent.loadAncestors();
-                    Cache.addGoTerm(gtParent);
-                }
-            }
-            addAncestor(relation);
-        }
-    }
-    
     public boolean isRoot(){
         return Ontology.isOntology(description);
     }
     
     public List<Relationship> getAncestors() {
+        if (ancestors.isEmpty() && !isRoot()){
+            List<Relationship> retrievedAncestors = RelationshipDAO.loadAncestors(id, ontology); 
+            for (Relationship ancestor : retrievedAncestors) {
+                addAncestor(ancestor);
+            }
+        }
         return Collections.unmodifiableList(ancestors);
     }
 
@@ -74,7 +62,7 @@ public class GoTerm implements Comparable{
         return Collections.unmodifiableList(children);
     }
 
-    public boolean addAncestor(Relationship relation){
+    private boolean addAncestor(Relationship relation){
         boolean result=ancestors.add(relation);
         result&=addChildren(relation);
         return result;
@@ -87,7 +75,7 @@ public class GoTerm implements Comparable{
 
     @Override
     public int compareTo(Object o) {
-        return id-((GoTerm)o).id;
+        return id-((GOTerm)o).id;
     }
     @Override
     public boolean equals(Object obj) {
@@ -97,7 +85,7 @@ public class GoTerm implements Comparable{
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final GoTerm other = (GoTerm) obj;
+        final GOTerm other = (GOTerm) obj;
         return this.id == other.id;
     }
 

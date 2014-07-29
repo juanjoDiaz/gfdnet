@@ -12,8 +12,9 @@ import org.cytoscape.gfdnet.model.logic.utils.CollectionUtil;
 public class Gene implements Comparable{
     private String name;
     private final SortedSet<String> synonyms;
+    protected String loadedOntology;
     private final SortedSet<GeneProduct> geneProducts;
-    private final SortedSet<GoTerm> goTerms;
+    private final SortedSet<GOTerm> goTerms;
     
     public Gene(String name) {
         this.name = name;
@@ -49,12 +50,17 @@ public class Gene implements Comparable{
                 : (this.name.equalsIgnoreCase(gene.name) || CollectionUtil.search(synonyms, gene.name) != null);
     }
     
+    public String getLoadedOntology(){
+        return loadedOntology;
+    }
+    
     public void addGeneProduct(GeneProduct geneProduct) {
         geneProducts.add(geneProduct);
     }
     
-    protected SortedSet<GoTerm> getGoTerms(String ontology) {
+    protected SortedSet<GOTerm> getGoTerms(String ontology) {
         if (goTerms.isEmpty()){
+            loadedOntology = ontology;
             for(GeneProduct geneProduct : geneProducts){
                 goTerms.addAll(geneProduct.getGoTerms(ontology));
             }

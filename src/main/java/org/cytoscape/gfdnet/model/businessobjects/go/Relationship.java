@@ -8,20 +8,20 @@ package org.cytoscape.gfdnet.model.businessobjects.go;
 public class Relationship {
     private int id;
     private String relationshipType;
-    private GoTerm goTerm;
+    private GOTerm goTerm;
     public static String is_a="is_a",
                          part_of="part_of",
                          regulate="regulates",
                          positive_regulate="positively_regulates", 
                          negative_regulate="negatively_regulates";
 
-    public Relationship(int id, String tipoRelacion, GoTerm goTerm) {
+    public Relationship(int id, String tipoRelacion, GOTerm goTerm) {
         this.id = id;
         this.relationshipType = tipoRelacion;
         this.goTerm = goTerm;
     }
 
-    public Relationship(int id, GoTerm goTerm) {
+    public Relationship(int id, GOTerm goTerm) {
         this(id,"",goTerm);
     }
 
@@ -30,11 +30,11 @@ public class Relationship {
         return id;
     }
 
-    public GoTerm getGoTerm() {
+    public GOTerm getGoTerm() {
         return goTerm;
     }
 
-    public void setGoTerm(GoTerm goTerm) {
+    public void setGoTerm(GOTerm goTerm) {
         this.goTerm = goTerm;
     }
 
