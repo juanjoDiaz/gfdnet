@@ -1,11 +1,12 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import java.util.Collections;
-import java.util.SortedSet;
-import org.cytoscape.gfdnet.model.dataaccess.go.GoTermDAO;
+import java.util.Set;
+import org.cytoscape.gfdnet.model.dataaccess.go.GOTermDAO;
 
 /**
- *
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Norberto Díaz-Díaz
  * @author Juan José Díaz Montaña
  */
@@ -13,8 +14,8 @@ public class GeneProduct implements Comparable {
 
     private final Integer id;
     private final String description;
-    private SortedSet<GOTerm> goTerms;
-    public String loadedOntology;
+    private Set<GOTerm> goTerms;
+    public Ontology loadedOntology;
 
     public GeneProduct(Integer id, String description) {
         this.id = id;
@@ -29,12 +30,12 @@ public class GeneProduct implements Comparable {
         return description;
     }
     
-    public SortedSet<GOTerm> getGoTerms(String ontology) {
-        if (goTerms == null || !(this.loadedOntology == null ? ontology == null : this.loadedOntology.equals(ontology))){
+    public Set<GOTerm> getGoTerms(Ontology ontology) {
+        if (loadedOntology == null || !loadedOntology.equals(ontology)) {
+            goTerms = GOTermDAO.getGoTerms(id, ontology);
             loadedOntology = ontology;
-            goTerms = GoTermDAO.getGoTerms(id, ontology);
         }
-        return Collections.unmodifiableSortedSet(goTerms);
+        return Collections.unmodifiableSet(goTerms);
     }
         
     @Override
@@ -51,9 +52,7 @@ public class GeneProduct implements Comparable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
+        return id;
     }
 
     @Override

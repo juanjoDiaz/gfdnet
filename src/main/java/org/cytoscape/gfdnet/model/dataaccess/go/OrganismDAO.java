@@ -12,7 +12,7 @@ import org.cytoscape.gfdnet.model.dataaccess.DataBase;
  * @author Juan José Díaz Montaña
  */
 public class OrganismDAO {
-    public static boolean isValid(String genus, String species){
+    public static boolean isValid(String genus, String species) {
         DataBase.openConnection();
         String sql = "SELECT * FROM species " +
                 "WHERE genus= \"" + genus + "\" " +
@@ -22,7 +22,7 @@ public class OrganismDAO {
         try {
             exists = rs.next();
         } catch (SQLException e) {
-            System.err.println("Error while validating organism on the database.\n" + e.getMessage());
+            DataBase.logReadResultException("Error validating organism on the database.", e);
         }
         finally {
             DataBase.closeQuery(rs);
@@ -31,7 +31,7 @@ public class OrganismDAO {
         return exists;
     }
     
-    public static List<String> getGenera(){
+    public static List<String> getGenera() {
         DataBase.openConnection();
         String sql="SELECT s.genus AS genus FROM species s GROUP BY s.genus ORDER BY s.genus;";
         List<String> genus = new ArrayList();
@@ -41,7 +41,7 @@ public class OrganismDAO {
                 genus.add(rs.getString("genus"));
             }
         } catch (SQLException e) {
-            System.err.println("Error while retrieving all existing genera from the database.\n" + e.getMessage());
+            DataBase.logReadResultException("Error retrieving all existing genera from the database.", e);
         }
         finally {
             DataBase.closeQuery(rs);
@@ -50,7 +50,7 @@ public class OrganismDAO {
         return genus;
     }
 
-    public static List<String> getSpeciesFromGenus(String genus){
+    public static List<String> getSpeciesFromGenus(String genus) {
         DataBase.openConnection();
         String sql = "SELECT species FROM species s WHERE genus=\""+genus+"\" ORDER BY species;";
         List<String> species = new ArrayList();
@@ -60,7 +60,7 @@ public class OrganismDAO {
                 species.add(rs.getString("species"));
             }
         } catch (SQLException e) {
-            System.err.println("Error while retrieving all " + genus + " species from the database.\n" + e.getMessage());
+            DataBase.logReadResultException("Error retrieving all " + genus + " species from the database.", e);
         }
         finally {
             DataBase.closeQuery(rs);

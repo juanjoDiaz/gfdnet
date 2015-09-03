@@ -5,9 +5,9 @@ import org.cytoscape.gfdnet.controller.tasks.PreloadOrganismTask;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
 import org.cytoscape.gfdnet.controller.utils.NetworkAdapter;
 import org.cytoscape.gfdnet.controller.utils.OSGiManager;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
-import org.cytoscape.gfdnet.model.businessobjects.go.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
 import org.cytoscape.gfdnet.model.dataaccess.DataBase;
 
@@ -21,17 +21,17 @@ public class CoreController {
     private String password;
     private Graph<String> graph;
     private Organism organism;
-    private String ontology;
-    
-    private NetworkViewController networkView;
-    private ToolBarController toolbar;
+    private Ontology ontology;
+
+    private final ToolBarController toolbar;
+    private NetworkController networkView;
     private ResultPanelsController resultPanels;
 
-    public CoreController() throws Exception{
+    public CoreController() throws InstantiationException{
         URL = "localhost/GO";
         user = "root";
         password = "root";
-        networkView = new NetworkViewController();
+        networkView = new NetworkController();
         graph = NetworkAdapter.IncomingCyNetworkToGraph(networkView.getNetworkView().getModel());
         ontology = Ontology.BP;
         toolbar = new ToolBarController(this);
@@ -59,22 +59,27 @@ public class CoreController {
    
     public void configurateDB(String url, String user, String password){
         try{
+            if (!"mysql.ebi.ac.uk:4085/go_latest".equals(url)) {
+                this.URL = url;
+                this.user = user;
+                this.password = password;
+            }
             DataBase.setConnection(url, user, password);
             DataBase.testConnection();
-            toolbar.setOrganismButtonEnabled(true);
+            toolbar.enableOrganismButton(true);
             CySwing.displayPopUpMessage("Database connection successfully set!");
         }
         catch(Exception ex){
             CySwing.displayPopUpMessage(ex.getMessage());
-            toolbar.setOrganismButtonEnabled(false);
-            toolbar.executeButtonEnabled(false);
+            toolbar.enableOrganismButton(false);
+            toolbar.enableExecuteButton(false);
         }
     }
    
-    public void setOntology(String o){
+    public void setOntology(Ontology ontology){
         try{
-            if(!ontology.equals(o)){
-                ontology = o;
+            if(!this.ontology.equals(ontology)){
+                this.ontology = ontology;
                 reset();
             }
             CySwing.displayPopUpMessage("Ontology successfully set!");
@@ -88,7 +93,7 @@ public class CoreController {
         if(organism == null || (!organism.getGenus().equals(genus) && !organism.getSpecies().equals(species))){
             organism = new Organism(genus, species);
         }
-        if (preload && !organism.isPreloaded()){
+        if (preload){
             OSGiManager.executeTask(new PreloadOrganismTask(organism, ontology, this));
         }
         else {
@@ -107,9 +112,9 @@ public class CoreController {
                 resultPanels.dispose();
             }
             networkView.dispose();
-            networkView = new NetworkViewController();
+            networkView = new NetworkController();
             graph = NetworkAdapter.IncomingCyNetworkToGraph(networkView.getNetworkView().getModel());
-            toolbar.executeButtonEnabled(true);
+            toolbar.enableExecuteButton(true);
         }
         catch(Exception ex){
             CySwing.displayPopUpMessage(ex.getMessage());
@@ -120,12 +125,14 @@ public class CoreController {
         if (resultPanels != null){
             resultPanels.dispose();
         }
+        networkView.clearGFDnetInfo();
         networkView.restoreNetwork();
-        toolbar.executeButtonEnabled(true);
+        toolbar.enableExecuteButton(true);
     }
     
     public void showResults(GFDnetResult result){
-        resultPanels = new ResultPanelsController(result, networkView);        
+        resultPanels = new ResultPanelsController(result, networkView);
+        networkView.addGFDnetInfo(result.getNetwork());
     }
     
     public ToolBarController getToolbar(){

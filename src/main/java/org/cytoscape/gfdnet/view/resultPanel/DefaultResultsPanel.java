@@ -1,6 +1,5 @@
 package org.cytoscape.gfdnet.view.resultPanel;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +29,8 @@ public class DefaultResultsPanel extends javax.swing.JPanel {
         List<Object[]> summaryModel = new ArrayList();
         for (int i=0; i< len; i++){
             for (int j=i+1; j< len; j++){
-                BigDecimal weight = net.getEdgeWeight(i,j);
-                if(!weight.equals(new BigDecimal(-1))){
+                double weight = net.getEdgeWeight(i,j);
+                if(weight != -1){
                     Object[] row = new Object[3];
                     row[0] = net.getNode(i).getName();
                     row[1] = net.getNode(j).getName();
@@ -43,15 +42,17 @@ public class DefaultResultsPanel extends javax.swing.JPanel {
         Collections.sort(summaryModel, new Comparator(){
             @Override
             public int compare(Object o1, Object o2) {
-                BigDecimal p1 = ((BigDecimal) ((Object[])o1)[2]);
-                BigDecimal p2 = (BigDecimal) ((Object[])o2)[2];
-                return p1.compareTo(p2);
+                double p1 = ((Double) ((Object[])o1)[2]);
+                double p2 = (Double) ((Object[])o2)[2];
+                if (p1 < p2) { return -1; }
+                else if (p1 > p2) { return 1; }
+                else { return 0; }
             }
         });
         
         rows = new Object[summaryModel.size()][3];
         for (Object[] rowIt : summaryModel){
-            rowIt[2] = (rowIt[2]).toString();
+            rowIt[2] = String.format("%.6f", (Double)rowIt[2]);
             System.arraycopy(rowIt, 0, rows[cont], 0, 3);
             cont++;
         }

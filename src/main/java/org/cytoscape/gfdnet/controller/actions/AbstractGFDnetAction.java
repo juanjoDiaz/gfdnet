@@ -11,18 +11,19 @@ import org.cytoscape.gfdnet.controller.CoreController;
 public abstract class AbstractGFDnetAction extends AbstractCyAction{
     protected final CoreController core;
     
-    public AbstractGFDnetAction(CoreController core, String name, String menuOrIcon) {
+    public AbstractGFDnetAction(CoreController core, String name, String iconName) {
         super(name);
-        if(menuOrIcon.startsWith("/images/")){
-            ImageIcon icon = new ImageIcon(getClass().getResource(menuOrIcon));
-            putValue(LARGE_ICON_KEY, icon);
-            this.inToolBar = true;
-            this.inMenuBar = false;
-        }else{
-            setPreferredMenu(menuOrIcon); 
-            this.inToolBar = false;
-            this.inMenuBar = true;
-        }
+        putValue(LARGE_ICON_KEY, new ImageIcon(getClass().getResource(iconName)));
+        putValue(SHORT_DESCRIPTION, name);
+        this.inToolBar = true;
+        this.inMenuBar = false;
+        this.toolbarGravity = 100.0f;
+        
         this.core = core;
     }
+    
+    @Override
+    public void updateEnableState() {
+        //DO Nothing
+    } 
 }

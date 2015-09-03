@@ -2,14 +2,12 @@ package org.cytoscape.gfdnet.view.resultPanel;
 
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.math.BigDecimal;
 import javax.swing.Icon;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.gfdnet.controller.ResultPanelsController;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
-import org.cytoscape.gfdnet.model.businessobjects.go.Ontology;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -24,7 +22,7 @@ public class MainResultsView extends javax.swing.JPanel implements CytoPanelComp
     public MainResultsView(GFDnetResult result, ResultPanelsController resultPanels) {
         this.resultPanels = resultPanels;
         initComponents(result);
-        similarityValue.setText(result.getSimilarity().toPlainString());
+        similarityValue.setText(String.format("%.6f", result.getSimilarity()));
     }
 
     /**
@@ -47,7 +45,7 @@ public class MainResultsView extends javax.swing.JPanel implements CytoPanelComp
         similarityLabel = new javax.swing.JLabel();
         similarityValue = new javax.swing.JTextField();
         ContainerPanel = new javax.swing.JPanel();
-        DefaultResultsPanel = new DefaultResultsPanel(result.getNet(), resultPanels);
+        DefaultResultsPanel = new DefaultResultsPanel(result.getNetwork(), resultPanels);
         NodeResultsPanel = new NodeResultsPanel(result.getOntology());
         EdgeResultsPanel = new EdgeResultsPanel(resultPanels);
 
@@ -67,17 +65,8 @@ public class MainResultsView extends javax.swing.JPanel implements CytoPanelComp
         GenusValue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         OntologyValue.setEditable(false);
-        String ontology = result.getOntology();
-        if (ontology.equals(Ontology.BP)){
-            ontology = "Biological Process";
-        }
-        else if (ontology.equals(Ontology.CC)){
-            ontology = "Cellular Component";
-        }
-        else if (ontology.equals(Ontology.MF)){
-            ontology = "Molecular Function";
-        }
-        OntologyValue.setText(ontology);
+
+        OntologyValue.setText(result.getOntology().getDescription());
         OntologyValue.setBorder(null);
         OntologyValue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
@@ -171,7 +160,7 @@ public class MainResultsView extends javax.swing.JPanel implements CytoPanelComp
         getCardLayout().show(ContainerPanel, "NodeResultsPanel");
     }
     
-    public void showEdgeInfo(GeneInput gene1, GeneInput gene2, BigDecimal similarity){
+    public void showEdgeInfo(GeneInput gene1, GeneInput gene2, double similarity){
         EdgeResultsPanel.updateView(gene1, gene2, similarity);
         getCardLayout().show(ContainerPanel, "EdgeResultsPanel");
     }

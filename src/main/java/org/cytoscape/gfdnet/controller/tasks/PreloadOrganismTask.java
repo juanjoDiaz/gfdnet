@@ -4,8 +4,11 @@ import org.cytoscape.gfdnet.controller.CoreController;
 import org.cytoscape.gfdnet.controller.ToolBarController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
 import org.cytoscape.gfdnet.controller.utils.CytoscapeTaskMonitor;
-import org.cytoscape.gfdnet.model.businessobjects.ProgressMonitor;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
+import org.cytoscape.gfdnet.model.businessobjects.exceptions.DataBaseException;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
+import org.cytoscape.gfdnet.model.logic.OrganismPreloader;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 
@@ -14,12 +17,12 @@ import org.cytoscape.work.TaskMonitor;
  * @author Juan José Díaz Montaña
  */
 public class PreloadOrganismTask extends AbstractTask{
-    private String ontology;
-    private Organism organism;
-    private CoreController core;
-    private Thread taskThread;
+    private final Ontology ontology;
+    private final Organism organism;
+    private final CoreController core;
+    private OrganismPreloader organismPreloader;
     
-    public PreloadOrganismTask(Organism organism, String ontology, CoreController core) {
+    public PreloadOrganismTask(Organism organism, Ontology ontology, CoreController core) {
         this.ontology = ontology;
         this.organism = organism;
         this.core = core;
@@ -27,43 +30,40 @@ public class PreloadOrganismTask extends AbstractTask{
 
     @Override
     public void run(TaskMonitor tm) {
-        taskThread = Thread.currentThread();
         final ToolBarController toolbar = core.getToolbar();
         try{
-            toolbar.configDBButtonEnabled(false);
-            toolbar.setOntologyButtonEnabled(false);
-            toolbar.setOrganismButtonEnabled(false);
-            toolbar.executeButtonEnabled(false);
-            toolbar.refreshButtonEnabled(false);
+            toolbar.enableDBButton(false);
+            toolbar.enableOntologyButton(false);
+            toolbar.enableOrganismButton(false);
+            toolbar.enableExecuteButton(false);
+            toolbar.enableRefreshButton(false);
             tm.setTitle("Preloading " + organism.getGenus() + " " + organism.getSpecies() + "...");
             ProgressMonitor pm = new CytoscapeTaskMonitor(tm);
-            organism.preloadGenes(ontology, pm);
+            organismPreloader = new OrganismPreloader(pm);
+            organismPreloader.preloadGenes(organism, ontology);
             // TODO Change to observable task callback in 3.1
-            if (!taskThread.isInterrupted()){
+            if (organismPreloader.isInterrupted()){
                 core.reset();
-                toolbar.executeButtonEnabled(true);
+                toolbar.enableExecuteButton(true);
                 CySwing.displayPopUpMessage("Organism succesfully set!");
             }
+        } catch (DataBaseException ex) {
+            CySwing.displayPopUpMessage("There was a problem accesing the database.");
         }
         catch (Exception ex){
             CySwing.displayPopUpMessage(ex.getMessage());
         }
         finally{
-            toolbar.configDBButtonEnabled(true);
-            toolbar.setOntologyButtonEnabled(true);
-            toolbar.setOrganismButtonEnabled(true);
-            toolbar.refreshButtonEnabled(true);
+            toolbar.enableDBButton(true);
+            toolbar.enableOntologyButton(true);
+            toolbar.enableOrganismButton(true);
+            toolbar.enableRefreshButton(true);
         }
     } 
     
     @Override
     public void cancel(){
-        taskThread.interrupt();
-        ToolBarController toolbar = core.getToolbar();
-        toolbar.configDBButtonEnabled(true);
-        toolbar.setOntologyButtonEnabled(true);
-        toolbar.setOrganismButtonEnabled(true);
-        toolbar.refreshButtonEnabled(true); 
+        organismPreloader.interrupt();
         super.cancel();
         CySwing.displayPopUpMessage("Organism preload was cancelled");
     }

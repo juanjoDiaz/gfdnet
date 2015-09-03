@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.cytoscape.gfdnet.controller.utils.OSGiManager;
+import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
+import org.cytoscape.gfdnet.model.businessobjects.Graph;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -20,8 +22,11 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
-public final class NetworkViewController {
-    private CyNetworkView networkView;
+public final class NetworkController {
+    private final String GOTermColumn = "GO-Term";
+    private final String GFDNetColumn = "GFD-Net";
+    private final CyNetwork network;
+    private final CyNetworkView networkView;
     
     // Store the hiden elements and theirs positions so they can be restored
     private List<CyNode> hiddenNodes = new LinkedList<CyNode>();
@@ -29,24 +34,84 @@ public final class NetworkViewController {
     private Map<Long, Double> xPosition = new HashMap<Long, Double>();
     private Map<Long, Double> yPosition = new HashMap<Long, Double>();
     
-    public NetworkViewController() throws Exception{
+    public NetworkController() throws InstantiationException {
+        network = OSGiManager.getCyApplicationManager().getCurrentNetwork();
         networkView = OSGiManager.getCyApplicationManager().getCurrentNetworkView();
         if (networkView == null){
-            throw new Exception("A valid network view should be loaded.");
+            throw new InstantiationException("A valid network view should be loaded.");
         }
     }
     
     public void dispose(){
         restoreNetwork();
     }
-             
+    
+    public void addGFDnetInfo(Graph<GeneInput> gfdNetNetwork) {
+        addSelectedGoTerms(gfdNetNetwork);
+        addEdgeWeights(gfdNetNetwork);
+    }
+    
+    public void clearGFDnetInfo() {
+        if (network.getDefaultNodeTable().getColumn(GOTermColumn) != null) {
+            network.getDefaultNodeTable().deleteColumn(GOTermColumn);
+        }
+        if (network.getDefaultEdgeTable().getColumn(GFDNetColumn) != null) {
+            network.getDefaultEdgeTable().deleteColumn(GFDNetColumn);
+        }
+    }
+    
+    private void addSelectedGoTerms(Graph<GeneInput> gfdNetNetwork) {
+        CyTable nodeTable = network.getDefaultNodeTable();
+        try {
+            nodeTable.createColumn(GOTermColumn, String.class, false);
+        } catch (IllegalArgumentException ex) {
+            // Do nothing and just override the values in the collumn
+        }
+        
+        for (GeneInput gene : gfdNetNetwork.getNodes()){
+            for(CyRow row : nodeTable.getAllRows()){
+                if(row.get(CyNetwork.NAME, String.class).equals(gene.getName())){
+                    row.set(GOTermColumn, gene.getSelectedGOTerm().getName());
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void addEdgeWeights(Graph<GeneInput> gfdNetNetwork) {
+        CyTable edgeTable = network.getDefaultEdgeTable();
+        try {
+            edgeTable.createColumn(GFDNetColumn, Double.class, false);
+        } catch (IllegalArgumentException ex) {
+            // Do nothing and just override the values in the collumn
+        }
+        
+        List<CyEdge> edges = network.getEdgeList();
+        int noNodes = gfdNetNetwork.getNodes().size();
+        for (int i = 0; i < noNodes; i++) {
+            String n1 = gfdNetNetwork.getNode(i).getName();
+            for (int j = i + 1; j < noNodes; j++) {
+                String n2 = gfdNetNetwork.getNode(j).getName();
+                Double weight = gfdNetNetwork.getEdgeWeight(i, j);
+                if (weight != -1) {
+                    for(CyEdge edge : edges){
+                        if((network.getRow(edge.getSource()).get(CyNetwork.NAME, String.class).equals(n1) && network.getRow(edge.getTarget()).get(CyNetwork.NAME, String.class).equals(n2)) ||
+                                (network.getRow(edge.getSource()).get(CyNetwork.NAME, String.class).equals(n2) && network.getRow(edge.getTarget()).get(CyNetwork.NAME, String.class).equals(n1))){
+                            edgeTable.getRow(edge.getSUID()).set(GFDNetColumn, weight);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+     
     public void hideNodesNotInList(List<String> nodes){
-        CyNetwork network = networkView.getModel();
         List<CyNode> nodesView = network.getNodeList();
         for (CyNode node : nodesView){
             boolean hide = true;
-            for (String gen : nodes){
-                if (gen.equals(network.getRow(node).get(CyNetwork.NAME, String.class))){
+            for (String gene : nodes){
+                if (gene.equals(network.getRow(node).get(CyNetwork.NAME, String.class))){
                     hide = false;
                     break;
                 }
@@ -102,7 +167,6 @@ public final class NetworkViewController {
     }
             
     public void selectEdges(String n1, String n2){
-        CyNetwork network = networkView.getModel();
         CyTable nodeTable = network.getDefaultNodeTable();
         List<CyEdge> edges = network.getEdgeList();
         
@@ -122,7 +186,6 @@ public final class NetworkViewController {
     }
 
     public void selectNode(String nodeName){
-        CyNetwork network = networkView.getModel();
         CyTable nodeTable = network.getDefaultNodeTable();
         CyTable edgeTable = network.getDefaultEdgeTable();
         for (CyRow row : edgeTable.getAllRows()) {
@@ -140,7 +203,6 @@ public final class NetworkViewController {
     }
     
     public List<String> getSelectedElements(){
-        CyNetwork network = networkView.getModel();
         List<CyNode> nodes = CyTableUtil.getNodesInState(network,"selected",true);
         List<CyEdge> edges = CyTableUtil.getEdgesInState(network,"selected",true);
         if(nodes.size() == 1 && edges.isEmpty()){

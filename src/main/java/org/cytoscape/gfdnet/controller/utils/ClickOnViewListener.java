@@ -11,7 +11,7 @@ import org.cytoscape.model.events.RowsSetListener;
 public class ClickOnViewListener implements RowsSetListener{
 
     private boolean enable;
-    private ResultPanelsController resultPanels;
+    private final ResultPanelsController resultPanels;
     
     public ClickOnViewListener(ResultPanelsController resultPanels){
         this.resultPanels = resultPanels;

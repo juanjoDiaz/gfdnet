@@ -1,4 +1,4 @@
-package org.cytoscape.gfdnet.model.businessobjects;
+package org.cytoscape.gfdnet.model.businessobjects.utils;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>

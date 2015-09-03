@@ -3,6 +3,7 @@ package org.cytoscape.gfdnet.view.configurationDialogs;
 import java.util.List;
 import org.cytoscape.gfdnet.controller.CoreController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
+import org.cytoscape.gfdnet.model.businessobjects.exceptions.DataBaseException;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
 
 /**
@@ -10,7 +11,7 @@ import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
  * @author Juan José Díaz Montaña
  */
 public class SetOrganismSecondaryView extends javax.swing.JDialog {
-    private CoreController core;
+    private final CoreController core;
     private final String[] genus;
     private String[] species;
     /**
@@ -131,7 +132,13 @@ public class SetOrganismSecondaryView extends javax.swing.JDialog {
 
     private void genusListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_genusListValueChanged
         String curGenus = genusList.getSelectedValue().toString();
-        List<String> speciesAux = Organism.getSpeciesFromGenus(curGenus);
+        List<String> speciesAux;
+        try {
+            speciesAux = Organism.getSpeciesFromGenus(curGenus);
+        } catch (DataBaseException ex) {
+            CySwing.displayPopUpMessage("There was a problem accesing the database.");
+            return;
+        }
         species = speciesAux.toArray(new String[speciesAux.size()]);
         speciesList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = species;
@@ -145,15 +152,14 @@ public class SetOrganismSecondaryView extends javax.swing.JDialog {
     private void AcceptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AcceptButtonActionPerformed
         Object selectedGenus = genusList.getSelectedValue();
         Object selectedSpecie = speciesList.getSelectedValue();
-        if (selectedGenus != null && selectedSpecie != null){
-            String genusS = selectedGenus.toString();
-            String specieS = selectedSpecie.toString();
-            core.setOrganism(genusS, specieS, PreloadOrganismCheckBox.isSelected());
-            dispose();
-        }
-        else{
+        if (selectedGenus == null || selectedSpecie == null) {
             CySwing.displayPopUpMessage("A genus and a specie must be selected.");
+            return;
         }
+        String genusS = selectedGenus.toString();
+        String specieS = selectedSpecie.toString();
+        core.setOrganism(genusS, specieS, PreloadOrganismCheckBox.isSelected());
+        dispose(); 
     }//GEN-LAST:event_AcceptButtonActionPerformed
 
     private void CancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelButtonActionPerformed

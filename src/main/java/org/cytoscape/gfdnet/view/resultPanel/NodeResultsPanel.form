@@ -55,7 +55,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JList" name="RepresentationList">
+        <Component class="javax.swing.JList" name="GoTermList">
           <Properties>
             <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
               <StringArray count="0"/>
@@ -66,10 +66,10 @@
             <Property name="dragEnabled" type="boolean" value="true"/>
           </Properties>
           <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="RepresentationListMouseClicked"/>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="GoTermListMouseClicked"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="RepresentationList.setCellRenderer(new MyListCellRenderer());"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="GoTermList.setCellRenderer(new MyListCellRenderer());"/>
           </AuxValues>
         </Component>
       </SubComponents>

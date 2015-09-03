@@ -1,30 +1,26 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
+import org.cytoscape.gfdnet.model.businessobjects.Enums.RelationshipType;
+
 /**
- *
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Norberto Díaz-Díaz
  * @author Juan José Díaz Montaña
  */
 public class Relationship {
     private int id;
-    private String relationshipType;
+    private RelationshipType relationshipType;
     private GOTerm goTerm;
-    public static String is_a="is_a",
-                         part_of="part_of",
-                         regulate="regulates",
-                         positive_regulate="positively_regulates", 
-                         negative_regulate="negatively_regulates";
 
-    public Relationship(int id, String tipoRelacion, GOTerm goTerm) {
+    public Relationship(int id, RelationshipType relationshipType, GOTerm goTerm) {
         this.id = id;
-        this.relationshipType = tipoRelacion;
+        this.relationshipType = relationshipType;
         this.goTerm = goTerm;
     }
 
     public Relationship(int id, GOTerm goTerm) {
-        this(id,"",goTerm);
+        this(id, null, goTerm);
     }
-
 
     public int getId() {
         return id;
@@ -34,15 +30,7 @@ public class Relationship {
         return goTerm;
     }
 
-    public void setGoTerm(GOTerm goTerm) {
-        this.goTerm = goTerm;
-    }
-
-    public String getRelationshipType() {
+    public RelationshipType getRelationshipType() {
         return relationshipType;
-    }
-
-    public void setRelationshipType(String relationshipType) {
-        this.relationshipType = relationshipType;
     }
 }

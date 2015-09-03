@@ -5,6 +5,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import org.cytoscape.gfdnet.controller.CoreController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
+import org.cytoscape.gfdnet.model.businessobjects.exceptions.DataBaseException;
 import org.cytoscape.gfdnet.view.LoadingOrganismsDialog;
 
 /**
@@ -128,20 +129,27 @@ public class SetOrganismMainView extends javax.swing.JDialog {
                     SwingWorker worker = new SwingWorker<SetOrganismSecondaryView, Void>() {
                         @Override
                         public SetOrganismSecondaryView doInBackground() {
-                            return new SetOrganismSecondaryView(core, PreloadOrganismCheckBox.isSelected());
+                            try {
+                                return new SetOrganismSecondaryView(core, PreloadOrganismCheckBox.isSelected());
+                            } catch (DataBaseException ex) {
+                                CySwing.displayPopUpMessage("There was a problem accesing the database.");
+                                return null;
+                            }
                         }
                         @Override
                         public void done() {
                             try {
                                 final SetOrganismSecondaryView v = get();
-                                v.addWindowListener(new java.awt.event.WindowAdapter() {
-                                    @Override
-                                    public void windowClosing(java.awt.event.WindowEvent e) {
-                                        v.dispose();
-                                    }
-                                });
-                                d.dispose();
-                                v.setVisible(true);
+                                if (v != null) {
+                                    v.addWindowListener(new java.awt.event.WindowAdapter() {
+                                        @Override
+                                        public void windowClosing(java.awt.event.WindowEvent e) {
+                                            v.dispose();
+                                        }
+                                    });
+                                    d.dispose();
+                                    v.setVisible(true);
+                                }
                             } catch (InterruptedException ex) {
                                 d.dispose();
                                 CySwing.displayPopUpMessage("Something went wrong loading the organisms.");

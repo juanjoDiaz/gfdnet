@@ -132,15 +132,16 @@ public class ConfigurateLocalDBConnectionView extends javax.swing.JDialog {
         String newURL = this.URLTextField.getText();
         String newUser = this.UserTextField.getText();
         String newPassword = new String(this.PasswordTextBox.getPassword());
-        if (!newURL.isEmpty() && !newUser.isEmpty() && !newPassword.isEmpty())
-        {
-            core.configurateDB(newURL, newUser, newPassword);
-            dispose();
+        if (newURL.isEmpty()) {
+            CySwing.displayPopUpMessage("The url can be empty");
+            return;
         }
-        else
-        {
-            CySwing.displayPopUpMessage("Any field can be empty");
+        if (newUser.isEmpty()) {
+            CySwing.displayPopUpMessage("The username field can be empty");
+            return;
         }
+        core.configurateDB(newURL, newUser, newPassword);
+        dispose(); 
     }//GEN-LAST:event_AcceptButonActionPerformed
 
     private void CancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelButtonActionPerformed

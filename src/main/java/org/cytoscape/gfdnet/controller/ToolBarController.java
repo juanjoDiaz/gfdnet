@@ -45,25 +45,25 @@ public class ToolBarController {
         OSGiManager.unregisterService(refreshButton, CyAction.class);  
     }
     
-    public void configDBButtonEnabled(boolean enabled){
+    public void enableDBButton(boolean enabled){
         configDBButton.setEnabled(enabled);
     }
     
-    public void setOntologyButtonEnabled(boolean enabled){
+    public void enableOntologyButton(boolean enabled){
         setOntologyButton.setEnabled(enabled);
     }
     
-    public void setOrganismButtonEnabled(boolean enabled){
+    public void enableOrganismButton(boolean enabled){
         setOrganismButton.setEnabled(enabled);
     }
     
-    public void executeButtonEnabled(boolean enabled){
+    public void enableExecuteButton(boolean enabled){
         if(!enabled || setOrganismButton.isEnabled()){
             executeButton.setEnabled(enabled);
         }
     }  
     
-    public void refreshButtonEnabled(boolean enabled){
+    public void enableRefreshButton(boolean enabled){
         refreshButton.setEnabled(enabled);
     }
 }

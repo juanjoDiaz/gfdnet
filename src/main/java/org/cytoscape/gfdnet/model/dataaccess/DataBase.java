@@ -3,6 +3,7 @@ package org.cytoscape.gfdnet.model.dataaccess;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
+import org.cytoscape.gfdnet.model.businessobjects.exceptions.DataBaseException;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -10,6 +11,28 @@ import java.util.List;
  * @author Juan José Díaz Montaña
  */
 public class DataBase {
+    
+    public enum Errors {
+        Generic("There was a problem accesing the database."),
+        DriverNotFound("Can't find a MySQL JDBC driver."),
+        ConnetionFailed("Can't connect to the database."),
+        OpenConnectionFailed("Error opening the connection."),
+        CloseConnectionFailed("Error closing the connection."),
+        PrepareStatementFailed("Error preparing a statement."),
+        PrepareStatementIsCloseFailed("Error cheking if a prepared statement is closed."),
+        ExecuteQueryFailed("Error in the execution of a SQL query."),
+        CloseQueryFailed("Error cleaning the resources for query."),
+        ReadResultSetFailed("Error reading the record set."),
+        CloseResultSetFailed("Error closing the record set.");
+        
+        private Errors(String message){
+            this.message = message;
+        }
+
+        private final String message;
+
+        public String getMessage(){ return message; }
+    }
 
     private static String url = "jdbc:mysql://localhost/go";
     private static String user = "root";
@@ -17,18 +40,28 @@ public class DataBase {
     private static Connection connection = null;
     private static List<Statement> openedStatements = null;
 
-    public static void setConnection(String newUrl, String newUser, String newPassword) {
+   public static void setConnection(String newUrl, String newUser, String newPassword) {
         url = "jdbc:mysql://" + newUrl;
         user = newUser;
         password = newPassword;
     }
 
-    public static void testConnection() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        if (connection == null || connection.isClosed()) {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            connection = DriverManager.getConnection(url, user, password);
-            openedStatements = new LinkedList<Statement>();
-            closeConnection();
+    public static void testConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+                connection = DriverManager.getConnection(url, user, password);
+                connection.close();
+                connection = null;
+            }
+        } catch (ClassNotFoundException ex) {
+            throw new DataBaseException(Errors.DriverNotFound.getMessage(), ex);
+        } catch (SQLException ex) {
+            throw new DataBaseException(Errors.ConnetionFailed.getMessage(), ex);
+        } catch (InstantiationException ex) {
+            throw new DataBaseException(Errors.OpenConnectionFailed.getMessage(), ex);
+        } catch (IllegalAccessException ex) {
+            throw new DataBaseException(Errors.OpenConnectionFailed.getMessage(), ex);
         }
     }
 
@@ -48,17 +81,18 @@ public class DataBase {
                 connection.setReadOnly(true);
                 openedStatements = new LinkedList<Statement>();
             }
-            else {
-                System.err.println("There is already a connection to a database.");
-            }
-        } catch (SQLException e) {
-            System.err.println("Can't connect to the database.\n" + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.err.println("Can't find a MySQL JDBC driver.\n" + e.getMessage());
-        } catch (InstantiationException e) {
-            System.err.println("Error opening the connection: \n" + e.getMessage());
-        } catch (IllegalAccessException e) {
-            System.err.println("Error opening the connection: \n" + e.getMessage());
+        } catch (ClassNotFoundException ex) {
+            System.out.println(Errors.DriverNotFound.getMessage());
+            throw new DataBaseException(Errors.DriverNotFound.getMessage(), ex);
+        } catch (SQLException ex) {
+            System.out.println(Errors.ConnetionFailed.getMessage());
+            throw new DataBaseException(Errors.ConnetionFailed.getMessage(), ex);
+        } catch (InstantiationException ex) {
+            System.out.println(Errors.OpenConnectionFailed.getMessage());
+            throw new DataBaseException(Errors.OpenConnectionFailed.getMessage(), ex);
+        } catch (IllegalAccessException ex) {
+            System.out.println(Errors.OpenConnectionFailed.getMessage());
+            throw new DataBaseException(Errors.OpenConnectionFailed.getMessage(), ex);
         }
     }
 
@@ -72,8 +106,9 @@ public class DataBase {
                 connection.close();
                 connection = null;
             }
-        } catch (SQLException e) {
-            System.err.println("Error closing the connection.\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.CloseConnectionFailed.getMessage());
+            throw new DataBaseException(ex);
         }
     }
     
@@ -82,10 +117,20 @@ public class DataBase {
         try {
             stm = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             openedStatements.add(stm);
-        } catch (SQLException e) {
-            System.err.println("Error preparing a statement.\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.PrepareStatementFailed.getMessage());
+            throw new DataBaseException(ex);
         }
         return stm;
+    }
+    
+    public static boolean isPreparedStatementClosed(PreparedStatement stm) {
+        try {
+            return stm.isClosed();
+        } catch (SQLException ex) {
+            System.out.println(Errors.PrepareStatementIsCloseFailed.getMessage());
+            throw new DataBaseException(ex);
+        }
     }
     
     public static ResultSet executePreparedStatement(PreparedStatement stm, Object[] params) {
@@ -101,8 +146,9 @@ public class DataBase {
                 }                
             }
             rs = stm.executeQuery();
-        } catch (SQLException e) {
-            System.err.println("Error executing database query.\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.ExecuteQueryFailed.getMessage());
+            throw new DataBaseException(ex);
         }
         return rs;
     }
@@ -110,8 +156,9 @@ public class DataBase {
     public static void closeResultSet(ResultSet rs) {
         try {
             rs.close();
-        } catch (SQLException e) {
-            System.err.println("Error closing the record set.\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.CloseResultSetFailed.getMessage());
+            throw new DataBaseException(Errors.CloseResultSetFailed.getMessage(), ex);
         }
     }
 
@@ -126,11 +173,16 @@ public class DataBase {
         try {
             Statement statement = connection.createStatement();
             rs = statement.executeQuery(sql);
-        } catch (SQLException e) {
-            System.err.println("Error in the execution of the SQL query.\n" +
-                    "Wrong query: \n" + sql + "\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.ExecuteQueryFailed.getMessage() + "\n" + sql);
+            throw new DataBaseException(Errors.ExecuteQueryFailed.getMessage(), ex);
         }
         return rs;
+    }
+    
+    public static void logReadResultException(String message, SQLException ex) {
+        System.out.println(message);
+        throw new DataBaseException(message, ex);
     }
     
     public static void closeQuery(ResultSet rs) {
@@ -138,8 +190,9 @@ public class DataBase {
             Statement stm = rs.getStatement();
             rs.close();
             stm.close();
-        } catch (SQLException e) {
-            System.err.println("Error cleaning the resources for query." + "\n" + e.getMessage());
+        } catch (SQLException ex) {
+            System.out.println(Errors.CloseQueryFailed.getMessage());
+            throw new DataBaseException(ex);
         }
     }
 }

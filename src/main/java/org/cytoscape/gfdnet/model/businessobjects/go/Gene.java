@@ -1,26 +1,27 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.cytoscape.gfdnet.model.logic.utils.CollectionUtil;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- *
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Norberto Díaz-Díaz
  * @author Juan José Díaz Montaña
  */
-public class Gene implements Comparable{
-    private String name;
-    private final SortedSet<String> synonyms;
-    protected String loadedOntology;
-    private final SortedSet<GeneProduct> geneProducts;
-    private final SortedSet<GOTerm> goTerms;
+public class Gene implements Comparable {
+    protected String name;
+    protected final Set<String> synonyms;
+    protected final Set<GeneProduct> geneProducts;
+    protected final Set<GOTerm> goTerms;
+    protected Ontology loadedOntology;
     
     public Gene(String name) {
         this.name = name;
-        synonyms = new TreeSet();
-        geneProducts = new TreeSet();
-        goTerms = new TreeSet();
+        synonyms = new HashSet(); //Need to be ordered for hash 
+        geneProducts = new HashSet();
+        goTerms = new HashSet();
     }
     
     public String getName() {
@@ -41,16 +42,16 @@ public class Gene implements Comparable{
     public boolean isSynonym(String geneName) {
         return this.name == null
                 ? geneName == null 
-                : (this.name.equalsIgnoreCase(geneName) || CollectionUtil.search(synonyms, geneName) != null);
+                : (this.name.equalsIgnoreCase(geneName) || synonyms.contains(geneName));
     }
 
     public boolean isSynonym(Gene gene) {
         return this.name == null
                 ? gene.name == null 
-                : (this.name.equalsIgnoreCase(gene.name) || CollectionUtil.search(synonyms, gene.name) != null);
+                : (this.name.equalsIgnoreCase(gene.name) || synonyms.contains(gene.name));
     }
     
-    public String getLoadedOntology(){
+    public Ontology getLoadedOntology(){
         return loadedOntology;
     }
     
@@ -58,14 +59,15 @@ public class Gene implements Comparable{
         geneProducts.add(geneProduct);
     }
     
-    protected SortedSet<GOTerm> getGoTerms(String ontology) {
-        if (goTerms.isEmpty()){
-            loadedOntology = ontology;
-            for(GeneProduct geneProduct : geneProducts){
+    public Set<GOTerm> getGoTerms(Ontology ontology) {
+        if (loadedOntology == null || !loadedOntology.equals(ontology)) {
+            for(GeneProduct geneProduct : geneProducts) {
+                goTerms.clear();
                 goTerms.addAll(geneProduct.getGoTerms(ontology));
             }
+            loadedOntology = ontology;
         }
-        return goTerms;
+        return Collections.unmodifiableSet(goTerms);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class Gene implements Comparable{
             return false;
         }
         final Gene other = (Gene) obj;
-        return (this.name == null) ? (other.name == null) : this.name.equalsIgnoreCase(other.name);
+        return(this.name == null) ? (other.name == null) : this.name.equalsIgnoreCase(other.name);
     }
 
     @Override
@@ -93,19 +95,7 @@ public class Gene implements Comparable{
     }
 
     @Override
-     public String toString(){
-         return name;
-     }
-
-     public String getInformationRelated(){
-        String s="Name: "+name;
-        s+="\nGenes synonyms:"+synonyms;
-        s+="\nGeneProduct related information";
-        for(GeneProduct gp:geneProducts){
-            s+="\n\tId:"+gp.getId();
-            s+="\n\tDescription:"+gp.getDescription();
-            s+="\n\tGo-Terms related:" + gp.getGoTerms(name).toString();
-        }
-        return s;
+    public String toString(){
+        return name;
     }
 }

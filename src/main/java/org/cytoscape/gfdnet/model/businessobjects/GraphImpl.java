@@ -6,7 +6,8 @@ import java.util.List;
 
 /**
  * Implementation of the interface Graph using arrays
- * @param <T> 
+ * @param <T>
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
 public class GraphImpl<T> implements Graph<T>{
@@ -23,8 +24,8 @@ public class GraphImpl<T> implements Graph<T>{
      * -1 -> There is no edge
      * >-1 -> The weight of the edge
      */
-    private BigDecimal[][] adjMat; 
-	
+    private double[][] adjMat; 
+    
     /**
      * Empty constructor.
      * Creates an empty graph with n nodes
@@ -32,19 +33,17 @@ public class GraphImpl<T> implements Graph<T>{
      * @param n number of nodes of the graph
      */
     public GraphImpl (int n) {
-        if (n > 0){
-            this.nodes =(T[]) new Object[n];
-            this.adjMat = new BigDecimal[n-1][];
-            for (int i=0; i < n-1; i++) {
-                this.nodes[i] = null;
-                this.adjMat[i] = new BigDecimal[n-i-1];
-                for (int j= i+1; j < n; j++) {
-                    this.adjMat[i][j-i-1] = BigDecimal.valueOf(-1);
-                }
-            }
-        }
-        else{
+        if (n <= 0){
             throw new IllegalArgumentException("The graph should contains at least one node.");
+        }
+        this.nodes =(T[]) new Object[n];
+        this.adjMat = new double[n-1][];
+        for (int i=0; i < n-1; i++) {
+            this.nodes[i] = null;
+            this.adjMat[i] = new double[n-i-1];
+            for (int j= i+1; j < n; j++) {
+                this.adjMat[i][j-i-1] = -1;
+            }
         }
     }
     
@@ -92,23 +91,21 @@ public class GraphImpl<T> implements Graph<T>{
             j = i;
             i = aux;
         }
-        return !adjMat[i][j-i-1].equals(BigDecimal.valueOf(-1));
+        return adjMat[i][j-i-1] != -1;
     }
     
     @Override
-    public void setEdgeWeight(int i, int j, BigDecimal weight) {
+    public void setEdgeWeight(int i, int j, double weight) {
         assertNodesExist(i,j);
         if (i>j){
             int aux = j;
             j = i;
             i = aux;
         } 
-        if (!this.adjMat[i][j-i-1].equals(BigDecimal.valueOf(-1))){
-            this.adjMat[i][j-i-1] = weight;
-        }
-        else{
+        if (this.adjMat[i][j-i-1] == -1){
             throw new IllegalArgumentException("The nodes are not joined by an edge.");
         }
+        this.adjMat[i][j-i-1] = weight;
     }
     
     /**
@@ -122,7 +119,7 @@ public class GraphImpl<T> implements Graph<T>{
      * @throws IllegalArgumentException if one of the specified index doesn't exist
      */
     @Override
-    public BigDecimal getEdgeWeight(int i, int j) {
+    public double getEdgeWeight(int i, int j) {
         assertNodesExist(i,j);
         if (i>j){
             int aux = j;
@@ -141,19 +138,17 @@ public class GraphImpl<T> implements Graph<T>{
      * @throws IllegalArgumentException if one of the specified index doesn't exist
      */
     @Override
-    public void addEdge(int i, int j, BigDecimal weight) {
+    public void addEdge(int i, int j, double weight) {
         assertNodesExist(i,j);
         if (i>j){
             int aux = j;
             j = i;
             i = aux;
         }
-        if (this.adjMat[i][j-i-1].equals(BigDecimal.valueOf(-1))){
-            this.adjMat[i][j-i-1] = weight;
-        }
-        else{
+        if (this.adjMat[i][j-i-1] != -1) {
             throw new IllegalArgumentException("The nodes are already joined by an edge.");
         }
+        this.adjMat[i][j-i-1] = weight;
     }
     
     private void assertNodeExist(int i) {

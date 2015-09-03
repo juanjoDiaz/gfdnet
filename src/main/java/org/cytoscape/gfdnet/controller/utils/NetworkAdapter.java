@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.controller.utils;
 
-import java.math.BigDecimal;
+import java.util.LinkedList;
 import java.util.List;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
 import org.cytoscape.gfdnet.model.businessobjects.GraphImpl;
@@ -15,7 +15,8 @@ import org.cytoscape.model.CyNode;
 public class NetworkAdapter {
     public static Graph IncomingCyNetworkToGraph(CyNetwork network){
         List<CyNode> nodes = network.getNodeList();
-        List<CyEdge> edges = network.getEdgeList();        
+        List<CyEdge> edges = network.getEdgeList();
+        List<CyEdge> dulicatedEdges = new LinkedList<CyEdge>();
         if (nodes.isEmpty() || edges.isEmpty()){
             throw new IllegalArgumentException("The current network view seems to be empty."); 
         }
@@ -26,10 +27,14 @@ public class NetworkAdapter {
         for(CyEdge edge : edges){
             int i = nodes.indexOf(edge.getSource());
             int j = nodes.indexOf(edge.getTarget());
-            if (g.getEdgeWeight(i, j).equals(BigDecimal.valueOf(-1))) {
-                g.addEdge(i, j, BigDecimal.ONE);
+            if (i != j && g.getEdgeWeight(i, j) == -1) {
+                g.addEdge(i, j, 1);
+            } else {
+                // Remove edges to self or duplicated
+                dulicatedEdges.add(edge);
             }
         }
+        network.removeEdges(dulicatedEdges);
         return g;
     }
 }

@@ -1,6 +1,5 @@
 package org.cytoscape.gfdnet.view.resultPanel;
 
-import java.math.BigDecimal;
 import org.cytoscape.gfdnet.controller.ResultPanelsController;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 
@@ -127,12 +126,12 @@ public class EdgeResultsPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_gene2LabelMouseClicked
 
-    public void updateView(GeneInput gene1, GeneInput gene2, BigDecimal similarity){
+    public void updateView(GeneInput gene1, GeneInput gene2, double similarity){
         gene1Label.setText(gene1.getName());
-        Gene1RepresentationValue.setText(gene1.getRepresentationSelected().getGoTerm().getDescription());
+        Gene1RepresentationValue.setText(gene1.getSelectedGOTerm().getDescription());
         gene2Label.setText(gene2.getName());
-        Gene2RepresentationValue.setText(gene2.getRepresentationSelected().getGoTerm().getDescription());
-        RValue.setText(similarity.toPlainString());
+        Gene2RepresentationValue.setText(gene2.getSelectedGOTerm().getDescription());
+        RValue.setText(String.format("%.6f", similarity));
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

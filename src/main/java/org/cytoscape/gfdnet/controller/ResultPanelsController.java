@@ -16,20 +16,20 @@ import org.cytoscape.model.events.RowsSetListener;
  * @author Juan José Díaz Montaña
  */
 public class ResultPanelsController {
-    private NetworkViewController networkView;
+    private final NetworkController networkView;
     private GFDnetResult result;
     private MainResultsView rv;
     private ClickOnViewListener clickListerner;
     
-    public ResultPanelsController(GFDnetResult result, NetworkViewController networkView){
+    public ResultPanelsController(GFDnetResult result, NetworkController networkView){
         this.networkView = networkView;
         this.result = result;
-        List<GeneInput> nodes = result.getNet().getNodes();
-        List<String> genesToRemove = new ArrayList<String>(nodes.size());
+        List<GeneInput> nodes = result.getNetwork().getNodes();
+        List<String> genesToKeep = new ArrayList<String>(nodes.size());
         for (GeneInput node : nodes){
-           genesToRemove.add(node.getName()); 
+           genesToKeep.add(node.getName()); 
         }
-        networkView.hideNodesNotInList(genesToRemove);
+        networkView.hideNodesNotInList(genesToKeep);
         registerClickOnViewListener();
         rv = new MainResultsView(result, this);
         CySwing.addPanel(rv);
@@ -73,7 +73,7 @@ public class ResultPanelsController {
     public void showEdgeInfo(String n1, String n2){
         int i = -1;
         int j = -1;
-        List<GeneInput> genes = result.getNet().getNodes();
+        List<GeneInput> genes = result.getNetwork().getNodes();
         int cont = 0;
         for (GeneInput gene : genes){
             String geneName = gene.getName();
@@ -100,7 +100,7 @@ public class ResultPanelsController {
             }
             cont++;
         }
-        rv.showEdgeInfo(result.getNet().getNode(i), result.getNet().getNode(j), result.getNet().getEdgeWeight(i, j));
+        rv.showEdgeInfo(result.getNetwork().getNode(i), result.getNetwork().getNode(j), result.getNetwork().getEdgeWeight(i, j));
     }
     
     public void selectNode(String node){
@@ -110,7 +110,7 @@ public class ResultPanelsController {
     }
 
     public void showNodeInfo(String node){
-        List<GeneInput> genes = result.getNet().getNodes();
+        List<GeneInput> genes = result.getNetwork().getNodes();
         for (GeneInput gene : genes){
             if (gene.getName().equals(node)){
                 rv.showGeneInfo(gene);

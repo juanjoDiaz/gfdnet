@@ -3,11 +3,13 @@ package org.cytoscape.gfdnet.model.dataaccess.go;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.RelationshipType;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.businessobjects.go.Relationship;
-import org.cytoscape.gfdnet.model.dataaccess.Cache;
+import org.cytoscape.gfdnet.model.dataaccess.DBCache;
 import org.cytoscape.gfdnet.model.dataaccess.DataBase;
 
 /**
@@ -20,44 +22,45 @@ public class RelationshipDAO {
     private static PreparedStatement retrieveAncestorStatement = null;
     
     public static PreparedStatement getRetrieveAncestorsStatement() {
-        try {
-            if (retrieveAncestorStatement == null || retrieveAncestorStatement.isClosed()) {
-                retrieveAncestorStatement = DataBase.getPreparedStatement(
-                        "SELECT t.id as termId, t.name, " +
-                            "t.term_type, t.acc, t2t.id as relationshipId " +
-                        "FROM term t, term2term t2t " +
-                        "WHERE t2t.term1_id = t.id " +
-                            "AND t.is_obsolete = false " +
-                            "AND (SELECT name FROM term t2, term2term t2t2 " +
-                                "WHERE t2.id = t2t2.relationship_type_id " +
-                                    "AND t2t2.id = t2t.id) = \"is_a\" " +
-                            "AND t2t.term2_id = ? " +
-                            "AND term_type = ?;");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error preparing a statement.\n" + e.getMessage());
+        if (retrieveAncestorStatement == null || DataBase.isPreparedStatementClosed(retrieveAncestorStatement)) {
+            retrieveAncestorStatement = DataBase.getPreparedStatement(
+                    "SELECT t.id as termId, t.name, " +
+                        "t.term_type, t.acc, t2t.id as relationshipId " +
+                    "FROM term t, term2term t2t " +
+                    "WHERE t2t.term1_id = t.id " +
+                        "AND t.is_obsolete = false " +
+                        "AND (SELECT name FROM term t2, term2term t2t2 " +
+                            "WHERE t2.id = t2t2.relationship_type_id " +
+                                "AND t2t2.id = t2t.id) IN ('" + RelationshipType.is_a.getDBString() + "', '" +
+                                    RelationshipType.part_of.getDBString() + "', '" + RelationshipType.occurs_in.getDBString() + "')" +
+                        "AND t2t.term2_id = ? " +
+                        "AND t.term_type = ?;");
         }
         return retrieveAncestorStatement;
     }
     
-    public static List<Relationship> loadAncestors(int goTermId, String ontology){      
-        Object[] queryParams = {goTermId, ontology};
+    public static List<Relationship> loadAncestors(int goTermId, Ontology ontology) {      
+        Object[] queryParams = {goTermId, ontology.getDBString()};
         ResultSet rs = DataBase.executePreparedStatement(getRetrieveAncestorsStatement(), queryParams);
         
-        List<Relationship> relationships=new ArrayList();
+        List<Relationship> relationships = new LinkedList();
         try {
             while (rs.next()) {
-                GOTerm parentGOTerm = Cache.getOrAddGoTerm(new GOTerm(rs.getInt("termId"),rs.getString("acc"),rs.getString("name"), ontology));
+                GOTerm parentGOTerm = DBCache.goTerms.getOrAdd(new GOTerm(rs.getInt("termId"),rs.getString("acc"),rs.getString("name"), ontology));
                 Relationship relationship = new Relationship(
-                        rs.getInt("relationshipId"), Relationship.is_a,
+                        rs.getInt("relationshipId"), RelationshipType.is_a,
                         parentGOTerm);
                 relationships.add(relationship);
             }
-        } catch (SQLException ex) {
-            System.err.println("Error while loading ancestors from the database.\n" + ex);
+        } catch (SQLException e) {
+            DataBase.logReadResultException("Error while loading ancestors from the database.", e);
         }
         finally {
             DataBase.closeResultSet(rs);
+        }
+        // Has to be out of the previous loop so the prepared statement doesn't get re-used.
+        for (Relationship relationship : relationships) {
+            relationship.getGoTerm().loadAncestors();
         }
         return relationships;
     }

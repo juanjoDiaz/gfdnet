@@ -1,43 +1,92 @@
 package org.cytoscape.gfdnet.model.logic.utils;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
+import org.cytoscape.gfdnet.model.businessobjects.GOTree;
 import org.cytoscape.gfdnet.model.businessobjects.GOTreeNode;
-import org.cytoscape.gfdnet.model.businessobjects.Representation;
-import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
+import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
+import org.cytoscape.gfdnet.model.businessobjects.Graph;
 
 /**
- * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
- * @author Norberto Díaz-Díaz
+ *
  * @author Juan José Díaz Montaña
  */
-public class SimilarityUtils {
-
-    /**
-     * Calculates the specificity of a gene set being each gene represented by a representation.
-     * This specificity is calculated by averaging the dissimilarity of each pair of gene.
-     * 
-     * @param representations List of Representation
-     * @return The specificity of the representations set
-     */
-    public static BigDecimal getSimilarity(List<Representation> representations) {
-        int representationsSize = representations.size();
-        if(representationsSize <= 1) {
-            return BigDecimal.valueOf(0.5);
+public class SimilarityUtils { 
+    public static double getSimilarity(Graph<GeneInput> network, GOTree goTree, Map<GeneInput, GOTreeNode> selectedAnnotations, int version) {
+        switch (version) {
+            case 1:
+                return getSimilarity(goTree, selectedAnnotations);
+            case 2:
+                return getSimilarityNoPenalizing(network, goTree, selectedAnnotations);
+            default:
+                return getSimilarityPenalizing(network, goTree, selectedAnnotations);
+        }
+    }
+      
+    private static double getSimilarityNoPenalizing(Graph<GeneInput> network, GOTree goTree, Map<GeneInput, GOTreeNode> selectedAnnotations) {
+        int selectedAnnotationsSize = selectedAnnotations.size();
+        if(selectedAnnotationsSize <= 1) {
+            return 0.5;
         } else {
             int cont = 0;
-            BigDecimal similarity = new BigDecimal(0);
-            for (int i = 0; i < representationsSize; i++) {
-                Representation rep1 = representations.get(i);
-                for (int j = i + 1; j < representationsSize; j++) {
-                    Representation rep2 = representations.get(j);
-                    similarity = similarity.add(getSimilarity(rep1, rep2));
+            double similarity = 0;      
+            List<Map.Entry<GeneInput, GOTreeNode>> entries = new ArrayList<Map.Entry<GeneInput, GOTreeNode>>(selectedAnnotations.entrySet());
+            for (int i = 0; i < selectedAnnotationsSize; i++) {
+                Map.Entry<GeneInput, GOTreeNode> entry1 = entries.get(i);
+                GeneInput gene1 = entry1.getKey();
+                GOTreeNode annotation1 = entry1.getValue();
+                for (int j = i + 1; j < selectedAnnotationsSize; j++) {
+                    Map.Entry<GeneInput, GOTreeNode> entry2 = entries.get(j);
+                    GeneInput gene2 = entry2.getKey();
+                    GOTreeNode annotation2 = entry2.getValue();
+                    if (network.areConnected(gene1.getNodeId(), gene2.getNodeId())) {
+                        similarity = similarity + getSimilarity(goTree, annotation1, annotation2);
+                        cont++;
+                    }
+                }
+            }
+            
+            if (cont > 0) {
+                return similarity/cont;
+            } else {
+                return 0.5;
+            }
+        }
+    }
+    
+    private static double getSimilarityPenalizing(Graph<GeneInput> network, GOTree goTree, Map<GeneInput, GOTreeNode> selectedAnnotations) {
+        int selectedAnnotationsSize = selectedAnnotations.size();
+        if(selectedAnnotationsSize <= 1) {
+            return 0.5;
+        } else {
+            int cont = 0;
+            double similarity = 0;
+            List<Map.Entry<GeneInput, GOTreeNode>> entries = new ArrayList<Map.Entry<GeneInput, GOTreeNode>>(selectedAnnotations.entrySet());
+            for (int i = 0; i < selectedAnnotationsSize; i++) {
+                Map.Entry<GeneInput, GOTreeNode> entry1 = entries.get(i);
+                GeneInput gene1 = entry1.getKey();
+                GOTreeNode annotation1 = entry1.getValue();
+                for (int j = i + 1; j < selectedAnnotationsSize; j++) {
+                    Map.Entry<GeneInput, GOTreeNode> entry2 = entries.get(j);
+                    GeneInput gene2 = entry2.getKey();
+                    GOTreeNode annotation2 = entry2.getValue();               
+                    double nodesSimilarity = getSimilarity(goTree, annotation1, annotation2);
+ 
+                    if (!network.areConnected(gene1.getNodeId(), gene2.getNodeId())){
+                        nodesSimilarity = 1 - nodesSimilarity;
+                    }
+                    
+                    similarity = similarity + nodesSimilarity;
                     cont++;
                 }
             }
-            return similarity.divide(new BigDecimal(cont),10,RoundingMode.HALF_UP);
+
+            if (cont > 0) {
+                return similarity/cont;
+            } else {
+                return 0.5;
+            }
         }
     }
     
@@ -45,42 +94,33 @@ public class SimilarityUtils {
      * Calculates the specificity of a gene set being each gene represented by a representation.
      * This specificity is calculated by averaging the dissimilarity of each pair of gene.
      * 
-     * @param representations List of Representation
+     * @param goTree
+     * @param selectedAnnotations
      * @return The specificity of the representations set
      */
-    public static BigDecimal getSimilarity(GOTreeNode rep1, GOTreeNode rep2) {
-        BigDecimal distance = new BigDecimal(getDistance(rep1.getPath(), rep2.getPath()));
-        BigDecimal levels = new BigDecimal(rep1.getPath().size() + rep2.getPath().size());
-        return distance.divide(levels,10,RoundingMode.HALF_UP);
+    public static double getSimilarity(GOTree goTree, Map<GeneInput, GOTreeNode> selectedAnnotations) {
+        int selectedAnnotationsSize = selectedAnnotations.size();
+        if(selectedAnnotationsSize <= 1) {
+            return 0.5;
+        } else {
+            int cont = 0;
+            double similarity = 0;
+            List<GOTreeNode> annotations = new ArrayList<GOTreeNode>(selectedAnnotations.values());
+            for (int i = 0; i < selectedAnnotationsSize; i++) {
+                GOTreeNode annotation1 = annotations.get(i);
+                for (int j = i + 1; j < selectedAnnotationsSize; j++) {
+                    GOTreeNode annotation2 = annotations.get(j); 
+                    similarity = similarity + getSimilarity(goTree, annotation1, annotation2);
+                    cont++;
+                }
+            }
+            return similarity / cont;
+        }
     }
     
-    /**
-     * Calculates the distance between two GO-Terms in the GO-Tree.
-     * If there they share any Go-Term in their path to the root, 
-     * the distance is the sum of the previous elements in each stack.
-     * Otherwise, it is the sum of both of the whole paths plus 1 
-     * because both share the root element (GO:000001- all).
-     * 
-     * @param pathGen1 Stack containing all the GO-Terms between a gene representation (a GO-Term) and the ontology root
-     * @param pathGen2 Stack containing all the GO-Terms between a gene representation (a GO-Term) and the ontology root
-     * @return The distance between the two GO-Term
-     */
-    private static int getDistance(Stack<GOTerm> pathGen1, Stack<GOTerm> pathGen2) {
-        int pathGen1Size = pathGen1.size();
-        int pathGen2Size = pathGen2.size();
-        if (pathGen1Size > pathGen2Size) {
-            Stack<GOTerm> aux = pathGen1;
-            pathGen1 = pathGen2;
-            pathGen2 = aux;
-        }
-        int cont = 0;
-        for (GOTerm gt1 : pathGen1) {
-            int elementPosition = pathGen2.indexOf(gt1);
-            if (elementPosition != -1) {
-                return cont + elementPosition + 1;
-            }
-            cont++;
-        }
-        return pathGen1Size + pathGen2Size + 1;
+    public static double getSimilarity(GOTree goTree, GOTreeNode annotation1, GOTreeNode annotation2) {
+        GOTreeNode lca = goTree.getLCA(annotation1, annotation2);
+        int distance = lca.getDistanceToAnnotation(annotation1) + lca.getDistanceToAnnotation(annotation2) + 1;
+        return (double)distance/(2*lca.getDepth() + distance + 1); 
     }
 }

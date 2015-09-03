@@ -7,6 +7,7 @@ import java.util.List;
  * Graph interface ad hoc for GFD-Net.
  * The nodes are created at the beginning and only their values can be changed.
  * @param <T> 
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
 public interface Graph<T> {
@@ -51,9 +52,10 @@ public interface Graph<T> {
      * 
      * @param i id of the node at one side of the edge
      * @param j id of the node at the other side of the edge
+     * @param weight
      * @throws IllegalArgumentException if one of the specified index doesn't exist
      */
-    void setEdgeWeight(int i, int j, BigDecimal weight);
+    void setEdgeWeight(int i, int j, double weight);
         
     /**
      * Returns the weight of the edge between the nodes which ids are passed
@@ -65,7 +67,7 @@ public interface Graph<T> {
      * as parameters or -1 if it doesn't exist
      * @throws IllegalArgumentException if one of the specified index doesn't exist
      */
-    BigDecimal getEdgeWeight(int i, int j);
+    double getEdgeWeight(int i, int j);
     
     /**
      * Add an edge if it does not exist before
@@ -76,5 +78,5 @@ public interface Graph<T> {
      * @throws IllegalArgumentException if one of the specified index doesn't exist
      * or the edge doesn't exist
      */
-    void addEdge(int i, int j, BigDecimal weight);
+    void addEdge(int i, int j, double weight);
 }

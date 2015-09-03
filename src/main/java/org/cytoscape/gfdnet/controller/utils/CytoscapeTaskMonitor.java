@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.controller.utils;
 
-import org.cytoscape.gfdnet.model.businessobjects.ProgressMonitor;
+import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
 import org.cytoscape.work.TaskMonitor;
 
 /**

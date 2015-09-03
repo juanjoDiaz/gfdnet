@@ -2,14 +2,14 @@ package org.cytoscape.gfdnet.view.configurationDialogs;
 
 import org.cytoscape.gfdnet.controller.CoreController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
-import org.cytoscape.gfdnet.model.businessobjects.go.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
 public class SetOntologyView extends javax.swing.JDialog {
-    private CoreController core;
+    private final CoreController core;
     /**
      * Creates new form setOntologyV
      */

@@ -11,22 +11,23 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
-import org.cytoscape.gfdnet.model.businessobjects.Representation;
+import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
 public class NodeResultsPanel extends javax.swing.JPanel {
-    private String[] representationNames;
+    private String[] goTermsDisplayList;
     private int cont;
-    private final String ontology;
+    private final Ontology ontology;
     
     /**
      * Creates new form DefaultResultsPanel
      */
-    public NodeResultsPanel(String ontology) {
+    public NodeResultsPanel(Ontology ontology) {
         initComponents();
         this.ontology = ontology;
     }
@@ -42,20 +43,20 @@ public class NodeResultsPanel extends javax.swing.JPanel {
 
         GeneLabel = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        RepresentationList = new javax.swing.JList();
+        GoTermList = new javax.swing.JList();
 
         GeneLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         GeneLabel.setText("Gene");
 
-        RepresentationList.setCellRenderer(new MyListCellRenderer());
-        RepresentationList.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        RepresentationList.setDragEnabled(true);
-        RepresentationList.addMouseListener(new java.awt.event.MouseAdapter() {
+        GoTermList.setCellRenderer(new MyListCellRenderer());
+        GoTermList.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        GoTermList.setDragEnabled(true);
+        GoTermList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                RepresentationListMouseClicked(evt);
+                GoTermListMouseClicked(evt);
             }
         });
-        jScrollPane2.setViewportView(RepresentationList);
+        jScrollPane2.setViewportView(GoTermList);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -79,11 +80,11 @@ public class NodeResultsPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void RepresentationListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_RepresentationListMouseClicked
+    private void GoTermListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GoTermListMouseClicked
         if (evt.getClickCount()%2 == 0){
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
-                String SelectedValue = RepresentationList.getSelectedValue().toString();
+                String SelectedValue = GoTermList.getSelectedValue().toString();
                 String URL = "http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=" + SelectedValue.substring(0, SelectedValue.indexOf(" "));
                 try {
                     URI uri = new URI(URL);
@@ -95,26 +96,27 @@ public class NodeResultsPanel extends javax.swing.JPanel {
                 }
             }
         }
-    }//GEN-LAST:event_RepresentationListMouseClicked
+    }//GEN-LAST:event_GoTermListMouseClicked
 
     public void updateView(GeneInput gene){
         GeneLabel.setText(gene.getName());
-        Representation selectedRepresentation = gene.getRepresentationSelected();
-        List<Representation> representations = new ArrayList<Representation>(gene.getRepresentations(ontology));
-        representations.remove(selectedRepresentation);
-        representationNames = new String[representations.size()];
-        representationNames[0] = selectedRepresentation.getGoTerm().getName() + " " + selectedRepresentation.getGoTerm().getDescription();
+        GOTerm selectedGOTerm = gene.getSelectedGOTerm();
+        List<GOTerm> goTerms;
+        goTerms = new ArrayList<GOTerm>(gene.getGoTerms(ontology));
+        goTermsDisplayList = new String[goTerms.size()];
+        goTerms.remove(selectedGOTerm);
+        goTermsDisplayList[0] = selectedGOTerm.getName() + " " + selectedGOTerm.getDescription();
         cont = 1;
-        for (Representation representation : representations){
-            String element = representation.getGoTerm().getName() + " " + representation.getGoTerm().getDescription();
-            if (!(Arrays.asList(representationNames)).contains(element))
+        for (GOTerm goTerm : goTerms){
+            String element = goTerm.getName() + " " + goTerm.getDescription();
+            if (!(Arrays.asList(goTermsDisplayList)).contains(element))
             {
-                representationNames[cont] = element;
+                goTermsDisplayList[cont] = element;
                 cont++;
             }
         }
-        RepresentationList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = Arrays.copyOfRange(representationNames, 0, cont);
+        GoTermList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = Arrays.copyOfRange(goTermsDisplayList, 0, cont);
             @Override
             public int getSize() { return strings.length; }
             @Override
@@ -135,7 +137,7 @@ public class NodeResultsPanel extends javax.swing.JPanel {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel GeneLabel;
-    private javax.swing.JList RepresentationList;
+    private javax.swing.JList GoTermList;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
