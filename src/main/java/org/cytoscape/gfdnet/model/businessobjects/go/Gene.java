@@ -28,14 +28,14 @@ public class Gene implements Comparable {
         return name;
     }
     
-    public void convertSynonymInName(String synonym){
-        if (synonyms.remove(synonym)){
+    public void convertSynonymInName(String synonym) {
+        if (synonyms.remove(synonym)) {
             synonyms.add(name);
             name = synonym;
         }
     }
 
-    public void addSynonym(String synonym){
+    public void addSynonym(String synonym) {
         synonyms.add(synonym);
     }
     
@@ -51,7 +51,7 @@ public class Gene implements Comparable {
                 : (this.name.equalsIgnoreCase(gene.name) || synonyms.contains(gene.name));
     }
     
-    public Ontology getLoadedOntology(){
+    public Ontology getLoadedOntology() {
         return loadedOntology;
     }
     
@@ -60,7 +60,7 @@ public class Gene implements Comparable {
     }
     
     public Set<GOTerm> getGoTerms(Ontology ontology) {
-        if (loadedOntology == null || !loadedOntology.equals(ontology)) {
+        if (loadedOntology != ontology) {
             for(GeneProduct geneProduct : geneProducts) {
                 goTerms.clear();
                 goTerms.addAll(geneProduct.getGoTerms(ontology));
@@ -95,7 +95,7 @@ public class Gene implements Comparable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name;
     }
 }

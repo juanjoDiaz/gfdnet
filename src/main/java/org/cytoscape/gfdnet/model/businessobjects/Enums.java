@@ -6,11 +6,11 @@ package org.cytoscape.gfdnet.model.businessobjects;
  */
 public class Enums {
     public enum Ontology {
-        BP("Biological Proccess", "biological_process"),
+        BP("Biological Process", "biological_process"),
         CC("Cellular Component", "cellular_component"),
         MF("Molecular Function", "molecular_function");
         
-        private Ontology(String description, String dbString){
+        private Ontology(String description, String dbString) {
             this.description = description;
             this.dbString = dbString;
         }
@@ -18,8 +18,8 @@ public class Enums {
         private final String description;
         private final String dbString;
 
-        public String getDescription(){ return description; }
-        public String getDBString(){ return dbString; }
+        public String getDescription() { return description; }
+        public String getDBString() { return dbString; }
         
         public static boolean isOntology(String string) {          
             for(Ontology v : values()) {
@@ -33,7 +33,7 @@ public class Enums {
         public static Ontology getEnum (String string) {
             try {
                 return valueOf(string);
-            } catch (IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 for(Ontology v : values()) {
                     if(v.getDescription().equalsIgnoreCase(string) || v.getDBString().equalsIgnoreCase(string)) {
                         return v;
@@ -52,12 +52,12 @@ public class Enums {
         negative_regulate("negatively_regulates"),
         occurs_in("occurs_in");
         
-        private RelationshipType(String dbString){
+        private RelationshipType(String dbString) {
             this.dbString = dbString;
         }
         
         private final String dbString;
 
-        public String getDBString(){ return dbString; }
+        public String getDBString() { return dbString; }
     }
 }

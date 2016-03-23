@@ -41,7 +41,7 @@ public class GOTerm implements Comparable{
         return name;
     }
     
-    public boolean isRoot(){
+    public boolean isRoot() {
         return Ontology.isOntology(description);
     }
     
@@ -62,13 +62,13 @@ public class GOTerm implements Comparable{
         return Collections.unmodifiableSet(children);
     }
 
-    private boolean addAncestor(Relationship relation){
+    private boolean addAncestor(Relationship relation) {
         boolean result = ancestors.add(relation);
         result &= addChildren(relation);
         return result;
     }
 
-    private boolean addChildren(Relationship relation){
+    private boolean addChildren(Relationship relation) {
         Relationship rel = new Relationship(-1, relation.getRelationshipType(), this);
         return relation.getGoTerm().children.add(rel);
     }
@@ -96,7 +96,7 @@ public class GOTerm implements Comparable{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name;
     }
 }

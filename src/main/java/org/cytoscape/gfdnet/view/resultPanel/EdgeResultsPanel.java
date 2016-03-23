@@ -1,21 +1,29 @@
 package org.cytoscape.gfdnet.view.resultPanel;
 
-import org.cytoscape.gfdnet.controller.ResultPanelsController;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import org.cytoscape.gfdnet.controller.ResultPanelController;
+import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
+import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
 public class EdgeResultsPanel extends javax.swing.JPanel {
-    private final ResultPanelsController resultPanels;
+    private final ResultPanelController resultPanelController;
     /**
      * Creates new form DefaultResultsPanel
      * @param c
      */
-    public EdgeResultsPanel(ResultPanelsController resultPanels) {
+    public EdgeResultsPanel(ResultPanelController resultPanelController) {
+        this.resultPanelController = resultPanelController;
         initComponents();
-        this.resultPanels = resultPanels;
     }
 
     /**
@@ -27,24 +35,15 @@ public class EdgeResultsPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        Gene2RepresentationValue = new javax.swing.JTextField();
-        Gene1RepresentationValue = new javax.swing.JTextField();
         gene1Label = new javax.swing.JLabel();
         RLabel = new javax.swing.JLabel();
         gene2Label = new javax.swing.JLabel();
-        RValue = new javax.swing.JTextField();
-
-        Gene2RepresentationValue.setEditable(false);
-        Gene2RepresentationValue.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        Gene2RepresentationValue.setText("Gene2Representation");
-        Gene2RepresentationValue.setBorder(null);
-        Gene2RepresentationValue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-
-        Gene1RepresentationValue.setEditable(false);
-        Gene1RepresentationValue.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        Gene1RepresentationValue.setText("Gene1Representation");
-        Gene1RepresentationValue.setBorder(null);
-        Gene1RepresentationValue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        gene1RepresentationLabel = new javax.swing.JLabel();
+        gene1RepresentationLabel2 = new javax.swing.JLabel();
+        dissimilarityLabel = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        sharedGOTermsList = new javax.swing.JList();
+        sharedGOTermsLabel = new javax.swing.JLabel();
 
         gene1Label.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         gene1Label.setText("Gene 1:");
@@ -67,10 +66,23 @@ public class EdgeResultsPanel extends javax.swing.JPanel {
             }
         });
 
-        RValue.setEditable(false);
-        RValue.setText("R");
-        RValue.setBorder(null);
-        RValue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        gene1RepresentationLabel.setText("GO-Term 1");
+
+        gene1RepresentationLabel2.setText("Go-Term 2");
+
+        dissimilarityLabel.setText("Dissimilarity");
+
+        sharedGOTermsList.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        sharedGOTermsList.setDragEnabled(true);
+        sharedGOTermsList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                sharedGOTermsListMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(sharedGOTermsList);
+
+        sharedGOTermsLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        sharedGOTermsLabel.setText("Shared annotations:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -79,15 +91,18 @@ public class EdgeResultsPanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2)
                     .addComponent(gene1Label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(RLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(RValue, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
-                        .addGap(6, 6, 6))
-                    .addComponent(Gene1RepresentationValue, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Gene2RepresentationValue, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(gene2Label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(dissimilarityLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(gene2Label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gene1RepresentationLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gene1RepresentationLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(sharedGOTermsLabel)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -95,51 +110,92 @@ public class EdgeResultsPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(gene1Label, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(Gene1RepresentationValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(gene1RepresentationLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(gene2Label, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(Gene2RepresentationValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
+                .addComponent(gene1RepresentationLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(RLabel)
-                    .addComponent(RValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(277, Short.MAX_VALUE))
+                    .addComponent(dissimilarityLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sharedGOTermsLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void gene1LabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gene1LabelMouseClicked
         if (evt.getClickCount() == 1) {
-            resultPanels.selectNode(gene1Label.getText());
+            resultPanelController.selectNode(gene1Label.getText());
         }
         else if (evt.getClickCount() == 2) {
-            resultPanels.showNodeInfo(gene1Label.getText());
+            resultPanelController.showNodeInfo(gene1Label.getText());
         }
     }//GEN-LAST:event_gene1LabelMouseClicked
 
     private void gene2LabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gene2LabelMouseClicked
         if (evt.getClickCount() == 1) {
-            resultPanels.selectNode(gene2Label.getText());
+            resultPanelController.selectNode(gene2Label.getText());
         }
         else if (evt.getClickCount() == 2) {
-            resultPanels.showNodeInfo(gene2Label.getText());
+            resultPanelController.showNodeInfo(gene2Label.getText());
         }
     }//GEN-LAST:event_gene2LabelMouseClicked
 
-    public void updateView(GeneInput gene1, GeneInput gene2, double similarity){
+    private void sharedGOTermsListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sharedGOTermsListMouseClicked
+        if (evt.getClickCount()%2 == 0) {
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                String SelectedValue = sharedGOTermsList.getSelectedValue().toString();
+                String URL = "http://amigo.geneontology.org/amigo/term/" + SelectedValue.substring(0, SelectedValue.indexOf(" "));
+                try {
+                    URI uri = new URI(URL);
+                    desktop.browse(uri);
+                } catch (IOException ex) {
+
+                } catch (URISyntaxException ex) {
+
+                }
+            }
+        }
+    }//GEN-LAST:event_sharedGOTermsListMouseClicked
+
+    public void showEdgeDetails(GeneInput gene1, GeneInput gene2, double similarity) {
         gene1Label.setText(gene1.getName());
-        Gene1RepresentationValue.setText(gene1.getSelectedGOTerm().getDescription());
+        gene1RepresentationLabel.setText(gene1.getSelectedGOTerm().getName() + " - "+ gene1.getSelectedGOTerm().getDescription());
         gene2Label.setText(gene2.getName());
-        Gene2RepresentationValue.setText(gene2.getSelectedGOTerm().getDescription());
-        RValue.setText(String.format("%.6f", similarity));
+        gene1RepresentationLabel2.setText(gene2.getSelectedGOTerm().getName() + " - "+ gene2.getSelectedGOTerm().getDescription());
+        dissimilarityLabel.setText(String.format("%.6f", similarity));
+        Ontology ontology = resultPanelController.getResult().getOntology();
+        List<GOTerm> commonGOTerms = new ArrayList<GOTerm>(gene1.getGoTerms(ontology));
+        commonGOTerms.retainAll(gene2.getGoTerms(ontology));
+        final String[] goTermsDisplayList = new String[commonGOTerms.size()];
+        int i = 0;
+        for (GOTerm goTerm : commonGOTerms) {
+            goTermsDisplayList[i] = goTerm.getName() + " " + goTerm.getDescription();
+            i++;
+        }
+        sharedGOTermsList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = goTermsDisplayList;
+            @Override
+            public int getSize() { return strings.length; }
+            @Override
+            public Object getElementAt(int i) { return strings[i]; }
+        });
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField Gene1RepresentationValue;
-    private javax.swing.JTextField Gene2RepresentationValue;
     private javax.swing.JLabel RLabel;
-    private javax.swing.JTextField RValue;
+    private javax.swing.JLabel dissimilarityLabel;
     private javax.swing.JLabel gene1Label;
+    private javax.swing.JLabel gene1RepresentationLabel;
+    private javax.swing.JLabel gene1RepresentationLabel2;
     private javax.swing.JLabel gene2Label;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel sharedGOTermsLabel;
+    private javax.swing.JList sharedGOTermsList;
     // End of variables declaration//GEN-END:variables
 }

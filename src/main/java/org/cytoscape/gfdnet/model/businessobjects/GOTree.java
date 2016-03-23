@@ -37,7 +37,7 @@ public class GOTree {
         if (node.getGoTerm().isRoot()) {
             this.root = node;
         } else {
-            for (GOTreeNode parentNode : node.getAncestors()){
+            for (GOTreeNode parentNode : node.getAncestors()) {
                 BuildHelper ancestorHelper = buildGOTree(parentNode, gene, annotation, distance + 1);
                 for (Entry<GOTreeNode, Integer> entry : ancestorHelper.getAncestors().entrySet()) {
                     helper.setAncestor(entry.getKey(), entry.getValue() + 1);

@@ -1,6 +1,8 @@
 package org.cytoscape.gfdnet.model.logic.utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
 import org.cytoscape.gfdnet.model.businessobjects.GraphImpl;
@@ -18,33 +20,25 @@ public class GOUtils {
      * @param genes
      * @return Graph formed by the genes retrieved from GO
      */
-    public static Graph<GeneInput> getGenInputNetwork(Graph<String> network, List<GeneInput> genes){
+    public static Graph<GeneInput> getGenInputNetwork(Graph<String> network, List<GeneInput> genes) {
         List<String> nodes = network.getNodes();
+        Map<String, Integer> nodesMap = new HashMap<String, Integer>(nodes.size());
+        int i = 0;
+        for (String nodeName : nodes) {
+            nodesMap.put(nodeName, i);
+            i++;
+        }
+
         Graph<GeneInput> geneInputsNetwork = new GraphImpl<GeneInput>(genes.size());
         int genesSize = genes.size();
-        for(int i = 0; i < genesSize; i++){
+        for(i = 0; i < genesSize; i++) {
             GeneInput gene1 = genes.get(i);
-            gene1.setNodeId(i); 
-            String gene1Name = gene1.getName();
+            int posI = nodesMap.get(gene1.getName());
+            gene1.setNodeId(i);
             geneInputsNetwork.updateNodeValue(i, gene1);
-            for(int j = 0; j < i; j++){
-                String gene2Name = genes.get(j).getName();
-
-                int posI = -1;
-                int posJ = -1;
-                int cont = 0;
-                for (String node : nodes) {
-                    if (node.equalsIgnoreCase(gene1Name)){
-                        posI = cont;
-                    }
-                    else if (node.equalsIgnoreCase(gene2Name)){
-                        posJ = cont;
-                    }
-                    if(posI != -1 && posJ != -1){
-                        break;
-                    }
-                    cont++;
-                }
+            for(int j = i + 1; j < genesSize; j++) {
+                int posJ = nodesMap.get(genes.get(j).getName());
+                
                 geneInputsNetwork.addEdge(j, i, network.getEdgeWeight(posJ, posI));
             }
         }

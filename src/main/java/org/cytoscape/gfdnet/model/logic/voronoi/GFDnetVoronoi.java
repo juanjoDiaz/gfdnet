@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.GOTree;
 import org.cytoscape.gfdnet.model.businessobjects.GOTreeNode;
@@ -48,22 +47,15 @@ public class GFDnetVoronoi extends GFDnet {
     }
 
     /**
-     * This method is the bottle neck of the analysis and it is use a Divide and Conquer approach
-     * to overcome that. It gets the relevant section of the GO-Tree for the given network
+     * This method gets the relevant section of the GO-Tree for the given network
      * and execute several MetaThreads dividing the nodes of the tree in several sets
      * 
      * @param network
-     * @param ontology
      * @param version
      * @return The MethaThread that got the best result
      */
     @Override
-    public GFDnetResult evaluateGenes(Graph<GeneInput> network, Ontology ontology, int version) {
-        GOTree goTree = new GOTree(network.getNodes(), ontology);
-        return evaluateGenes(goTree, network, ontology, version);
-    }
-    
-    public GFDnetResult evaluateGenes(GOTree goTree, Graph<GeneInput> network, Ontology ontology, int version){
+    protected GFDnetResult evaluateGenes(GOTree goTree, Graph<GeneInput> network, int version) {
         Set<GOTreeNode> nodesIterator = goTree.getNodes();
         if (threads == 1) {
             for (GOTreeNode centralNode : nodesIterator) {
@@ -104,13 +96,13 @@ public class GFDnetVoronoi extends GFDnet {
             case 1:
                 double similarity = 0;
                 int cont = 0;
-                for (int i = 0; i < noNodes; i++){
+                for (int i = 0; i < noNodes; i++) {
                     GeneInput g1 = network.getNode(i);
                     GOTreeNode annotation1 = selectedAnnotations.get(g1);
                     g1.selectGOTerm(annotation1.getGoTerm());
                     network.updateNodeValue(i, g1);
-                    for (int j = i + 1; j < noNodes; j++){
-                        if (network.getEdgeWeight(i, j) != -1){
+                    for (int j = i + 1; j < noNodes; j++) {
+                        if (network.getEdgeWeight(i, j) != -1) {
                             GeneInput g2 = network.getNode(j);
                             GOTreeNode annotation2 = selectedAnnotations.get(g2);
                             double dissimilarity = SimilarityUtils.getSimilarity(goTree, annotation1, annotation2);
@@ -128,13 +120,13 @@ public class GFDnetVoronoi extends GFDnet {
                 break;
             case 2:
             case 3:
-                for (int i = 0; i < noNodes; i++){
+                for (int i = 0; i < noNodes; i++) {
                     GeneInput g1 = network.getNode(i);
                     GOTreeNode annotation1 = selectedAnnotations.get(g1);
                     g1.selectGOTerm(annotation1.getGoTerm());
                     network.updateNodeValue(i, g1);
-                    for (int j = i + 1; j < noNodes; j++){
-                        if (network.getEdgeWeight(i, j) != -1){
+                    for (int j = i + 1; j < noNodes; j++) {
+                        if (network.getEdgeWeight(i, j) != -1) {
                             GeneInput g2 = network.getNode(j);
                             GOTreeNode annotation2 = selectedAnnotations.get(g2);
                             double dissimilarity = SimilarityUtils.getSimilarity(goTree, annotation1, annotation2);
@@ -145,7 +137,7 @@ public class GFDnetVoronoi extends GFDnet {
                 break;
         }
 
-        return new GFDnetResult(ontology, lowestDissimilarity, selectedCentralNode.getGoTerm(), network);
+        return new GFDnetResult(lowestDissimilarity, selectedCentralNode.getGoTerm(), network);
     }
     
     public void checkResult(GOTreeNode centralNode, double dissimilarity, Map<GeneInput, GOTreeNode> selectedAnnotations) {

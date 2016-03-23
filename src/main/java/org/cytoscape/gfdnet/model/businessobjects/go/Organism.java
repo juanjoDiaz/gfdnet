@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
+import org.cytoscape.gfdnet.model.businessobjects.GenesSearchResult;
 import org.cytoscape.gfdnet.model.dataaccess.go.GeneDAO;
 import org.cytoscape.gfdnet.model.dataaccess.go.OrganismDAO;
 
@@ -41,8 +42,8 @@ public class Organism {
     }
     
     public Set<GeneInput> getAllGenes() {
-        if (!isPreloaded){
-            genes = GeneDAO.getGenes(this); 
+        if (!isPreloaded) {
+            genes = new HashSet<GeneInput>(GeneDAO.getGenes(this)); 
             isPreloaded = true;
         }
         return Collections.unmodifiableSet(genes);
@@ -54,14 +55,14 @@ public class Organism {
      * @param geneNames List of gene names
      * @return List of genes extracted from GO
      */
-    public List<GeneInput> getGenes(List<String> geneNames) {
+    public GenesSearchResult getGenes(List<String> geneNames) {
         List<GeneInput> loadedGenes = new LinkedList<GeneInput>();
         List<String> notFoundGeneNames = new LinkedList<String>();
-        for (String geneName : geneNames){
+        for (String geneName : geneNames) {
             GeneInput gene = new GeneInput(geneName);
             GeneInput selectedGene = null;
-            for (GeneInput preloadedGene : genes){
-                if(preloadedGene.equals(gene)){
+            for (GeneInput preloadedGene : genes) {
+                if(preloadedGene.equals(gene)) {
                     selectedGene = preloadedGene;
                     break;
                 }
@@ -70,8 +71,8 @@ public class Organism {
                 }
             }
             if(selectedGene != null) {
-                if (!selectedGene.getName().equals(geneName)) {
-                    if (loadedGenes.contains(selectedGene)){
+                if (!selectedGene.getName().equalsIgnoreCase(geneName)) {
+                    if (loadedGenes.contains(selectedGene)) {
                         selectedGene = selectedGene.clone();
                     }
                     selectedGene.convertSynonymInName(geneName);
@@ -82,18 +83,24 @@ public class Organism {
             }
         }
         if (!isPreloaded && !notFoundGeneNames.isEmpty()) {
-            List<GeneInput> notFoundGenes = GeneDAO.getGenes(this, notFoundGeneNames);
-            loadedGenes.addAll(notFoundGenes);
-            genes.addAll(notFoundGenes);  
+            GenesSearchResult genesSearchResult = GeneDAO.getGenes(this, notFoundGeneNames);
+            loadedGenes.addAll(genesSearchResult.found);
+            genes.addAll(genesSearchResult.found);
+            return new GenesSearchResult(loadedGenes, genesSearchResult.unknown);
         }
-        return loadedGenes;
+        return new GenesSearchResult(loadedGenes, new LinkedList<String>());
+    }
+    
+    @Override
+    public String toString() {
+        return genus + " " + species;
     }
         
     public static List<String> getAllGenera() {
         return OrganismDAO.getGenera();
     }
 
-    public static List<String> getSpeciesFromGenus(String genus){
+    public static List<String> getSpeciesFromGenus(String genus) {
         return OrganismDAO.getSpeciesFromGenus(genus);
     }
 }

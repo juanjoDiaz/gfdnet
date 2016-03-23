@@ -17,11 +17,11 @@ public class GeneInput extends Gene {
         super(name);
     }
       
-    public boolean isKnown(Ontology ontology) {
+    public boolean isAnnotated(Ontology ontology) {
         return !getGoTerms(ontology).isEmpty();
     }
       
-    public GOTerm getSelectedGOTerm(){
+    public GOTerm getSelectedGOTerm() {
         return seletedGOTerm;
     }
     

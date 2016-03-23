@@ -73,7 +73,7 @@ public class SimilarityUtils {
                     GOTreeNode annotation2 = entry2.getValue();               
                     double nodesSimilarity = getSimilarity(goTree, annotation1, annotation2);
  
-                    if (!network.areConnected(gene1.getNodeId(), gene2.getNodeId())){
+                    if (!network.areConnected(gene1.getNodeId(), gene2.getNodeId())) {
                         nodesSimilarity = 1 - nodesSimilarity;
                     }
                     

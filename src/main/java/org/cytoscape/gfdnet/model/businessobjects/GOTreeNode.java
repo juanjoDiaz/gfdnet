@@ -71,13 +71,13 @@ public class GOTreeNode implements Comparable{
         return Collections.unmodifiableList(children);
     }
     
-    private boolean addAncestor(GOTreeNode node){
+    private boolean addAncestor(GOTreeNode node) {
         boolean result = ancestors.add(node);
         result &= node.addChildren(this);
         return result;
     }
     
-    private boolean addChildren(GOTreeNode node){
+    private boolean addChildren(GOTreeNode node) {
         return this.children.add(node);
     }
 
@@ -139,7 +139,7 @@ public class GOTreeNode implements Comparable{
                 double similarityNodeToLeave = Double.MAX_VALUE;
                 // Check annotations below the node
                 Set<GOTreeNode> leaves = getGeneAnnotations(gene);
-                if (leaves != null){
+                if (leaves != null) {
                     for (GOTreeNode candidateLeave : leaves) {
                         int distanceNodeToCandidateLeave = getDistanceToAnnotation(candidateLeave);
                         if (distanceNodeToCandidateLeave < distanceNodeToLeave || 

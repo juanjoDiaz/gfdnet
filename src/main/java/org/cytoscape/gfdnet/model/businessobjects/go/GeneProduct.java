@@ -31,7 +31,7 @@ public class GeneProduct implements Comparable {
     }
     
     public Set<GOTerm> getGoTerms(Ontology ontology) {
-        if (loadedOntology == null || !loadedOntology.equals(ontology)) {
+        if (loadedOntology != ontology) {
             goTerms = GOTermDAO.getGoTerms(id, ontology);
             loadedOntology = ontology;
         }

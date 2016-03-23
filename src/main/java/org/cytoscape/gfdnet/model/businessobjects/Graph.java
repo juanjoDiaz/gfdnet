@@ -1,6 +1,5 @@
 package org.cytoscape.gfdnet.model.businessobjects;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**

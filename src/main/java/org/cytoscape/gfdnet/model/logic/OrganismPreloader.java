@@ -5,7 +5,7 @@ import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
-import org.cytoscape.gfdnet.model.dataaccess.DataBase;
+import org.cytoscape.gfdnet.model.dataaccess.Database;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -16,7 +16,7 @@ public class OrganismPreloader {
     protected ProgressMonitor pm;
     protected boolean isInterrupted = false;
     
-    public OrganismPreloader(ProgressMonitor pm){
+    public OrganismPreloader(ProgressMonitor pm) {
         this.pm = pm;
     }
     
@@ -29,7 +29,7 @@ public class OrganismPreloader {
     }
     
     public void preloadGenes(Organism organism, Ontology ontology) {
-        DataBase.openConnection();
+        Database.openConnection();
         pm.setStatus("Retrieving genes from GO");
         // Load genes
         Set<GeneInput> genes = organism.getAllGenes();
@@ -37,15 +37,15 @@ public class OrganismPreloader {
         int cont = 1;
         int genesSize = genes.size();
         for(GeneInput gene : genes) {
-            if (isInterrupted){
-                DataBase.closeConnection();
+            if (isInterrupted) {
+                Database.closeConnection();
                 return;
             }
             pm.setStatus("Loading " + gene.getName());
-            gene.isKnown(ontology);
+            gene.isAnnotated(ontology);
             pm.setProgress((float)cont/genesSize);
             cont++;
         }
-        DataBase.closeConnection();
+        Database.closeConnection();
     }
 }

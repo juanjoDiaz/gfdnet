@@ -10,7 +10,7 @@ import org.cytoscape.gfdnet.model.businessobjects.Enums.RelationshipType;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.businessobjects.go.Relationship;
 import org.cytoscape.gfdnet.model.dataaccess.DBCache;
-import org.cytoscape.gfdnet.model.dataaccess.DataBase;
+import org.cytoscape.gfdnet.model.dataaccess.Database;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -22,8 +22,8 @@ public class RelationshipDAO {
     private static PreparedStatement retrieveAncestorStatement = null;
     
     public static PreparedStatement getRetrieveAncestorsStatement() {
-        if (retrieveAncestorStatement == null || DataBase.isPreparedStatementClosed(retrieveAncestorStatement)) {
-            retrieveAncestorStatement = DataBase.getPreparedStatement(
+        if (retrieveAncestorStatement == null || Database.isPreparedStatementClosed(retrieveAncestorStatement)) {
+            retrieveAncestorStatement = Database.getPreparedStatement(
                     "SELECT t.id as termId, t.name, " +
                         "t.term_type, t.acc, t2t.id as relationshipId " +
                     "FROM term t, term2term t2t " +
@@ -41,7 +41,7 @@ public class RelationshipDAO {
     
     public static List<Relationship> loadAncestors(int goTermId, Ontology ontology) {      
         Object[] queryParams = {goTermId, ontology.getDBString()};
-        ResultSet rs = DataBase.executePreparedStatement(getRetrieveAncestorsStatement(), queryParams);
+        ResultSet rs = Database.executePreparedStatement(getRetrieveAncestorsStatement(), queryParams);
         
         List<Relationship> relationships = new LinkedList();
         try {
@@ -53,10 +53,10 @@ public class RelationshipDAO {
                 relationships.add(relationship);
             }
         } catch (SQLException e) {
-            DataBase.logReadResultException("Error while loading ancestors from the database.", e);
+            Database.logReadResultException("Error while loading ancestors from the database.", e);
         }
         finally {
-            DataBase.closeResultSet(rs);
+            Database.closeResultSet(rs);
         }
         // Has to be out of the previous loop so the prepared statement doesn't get re-used.
         for (Relationship relationship : relationships) {

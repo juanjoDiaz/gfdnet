@@ -1,77 +1,70 @@
 package org.cytoscape.gfdnet.controller.tasks;
 
-import org.cytoscape.gfdnet.controller.CoreController;
-import org.cytoscape.gfdnet.controller.ToolBarController;
+import org.cytoscape.gfdnet.controller.NetworkController;
+import org.cytoscape.gfdnet.controller.ResultPanelController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
 import org.cytoscape.gfdnet.controller.utils.CytoscapeTaskMonitor;
 import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
-import org.cytoscape.gfdnet.model.businessobjects.Graph;
-import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
-import org.cytoscape.gfdnet.model.businessobjects.exceptions.DataBaseException;
+import org.cytoscape.gfdnet.model.businessobjects.exceptions.DatabaseException;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
+import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
 import org.cytoscape.gfdnet.model.logic.GFDnet;
 import org.cytoscape.gfdnet.model.logic.voronoi.GFDnetVoronoi;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 
 /**
- *
+ * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
-public class ExecuteGFDnetTask extends AbstractTask{
-    private final Graph<String> network;
+public class ExecuteGFDnetTask extends AbstractTask {
+    private GFDnet gfdnet;
     private final Organism organism;
     private final Ontology ontology;
-    private final CoreController core;
-    private GFDnet gfdnet;
     
-    public ExecuteGFDnetTask(Graph<String> network, Organism organism, Ontology ontology, CoreController core){
-        this.network = network;
+    public ExecuteGFDnetTask(Organism organism, Ontology ontology) {
         this.organism = organism;
-        this.ontology = ontology; 
-        this.core = core;
+        this.ontology = ontology;
     }
     
     @Override
-    public void run(TaskMonitor tm){
-        final ToolBarController toolbar = core.getToolbar();
+    public void run(TaskMonitor tm) {
+        NetworkController network;
         try {
-            toolbar.enableDBButton(false);
-            toolbar.enableOntologyButton(false);
-            toolbar.enableOrganismButton(false);
-            toolbar.enableExecuteButton(false);
-            toolbar.enableRefreshButton(false);
+            network = new NetworkController();
+        } catch (InstantiationException ex) {
+            CySwing.displayPopUpMessage(ex.getMessage());
+            return;
+        }
+        if (ontology == null) {
+            CySwing.displayPopUpMessage("No ontology selected.");
+            return;
+        }
+        if (organism == null) {
+            CySwing.displayPopUpMessage("No organism selected.");
+            return;
+        }
+        try {
             ProgressMonitor pm = new CytoscapeTaskMonitor(tm);
             GFDnet gfdNet = new GFDnetVoronoi(pm);
             tm.setTitle("Executing GFD-Net analysis");
-            GFDnetResult result = gfdNet.evaluateGeneNames(network, organism, ontology, 2);
-            // TODO Change to observable task callback in 3.1
-            if (!gfdNet.isInterrupted()){
-                core.showResults(result);
-                CySwing.displayPopUpMessage("GFD-Net succesfully finished!");
+            GFDnetResult result = gfdNet.evaluateGeneNames(network.getGraph(), organism, ontology, 2);
+            if (!gfdNet.isInterrupted()) {
+                pm.setStatus("Displaying the  results.");
+                new ResultPanelController(network, result);
+                CySwing.displayPopUpMessage("GFD-Net anlysis succesfully completed!");
             }
-            else{
-                toolbar.enableExecuteButton(true);
-            }
-        } catch (DataBaseException ex) {
+        } catch (DatabaseException ex) {
             CySwing.displayPopUpMessage("There was a problem accesing the database.");
         }
         catch (Exception ex) {
-            toolbar.enableOrganismButton(true);
-            toolbar.enableExecuteButton(true);
             CySwing.displayPopUpMessage(ex.getMessage());
-        }
-        finally {
-            toolbar.enableDBButton(true);
-            toolbar.enableOntologyButton(true);
-            toolbar.enableOrganismButton(true);
-            toolbar.enableRefreshButton(true);
         }
     } 
     
     @Override
-    public void cancel(){
+    public void cancel() {
         gfdnet.interrupt();
         super.cancel();
         CySwing.displayPopUpMessage("GFD-Net execution was cancelled");

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -20,16 +19,9 @@ import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
  * @author Juan José Díaz Montaña
  */
 public class NodeResultsPanel extends javax.swing.JPanel {
-    private String[] goTermsDisplayList;
-    private int cont;
-    private final Ontology ontology;
-    
-    /**
-     * Creates new form DefaultResultsPanel
-     */
-    public NodeResultsPanel(Ontology ontology) {
+
+    public NodeResultsPanel() {
         initComponents();
-        this.ontology = ontology;
     }
 
     /**
@@ -67,7 +59,7 @@ public class NodeResultsPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(GeneLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2)
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
@@ -75,17 +67,17 @@ public class NodeResultsPanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(GeneLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                .addComponent(jScrollPane2)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void GoTermListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GoTermListMouseClicked
-        if (evt.getClickCount()%2 == 0){
+        if (evt.getClickCount()%2 == 0) {
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
                 String SelectedValue = GoTermList.getSelectedValue().toString();
-                String URL = "http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=" + SelectedValue.substring(0, SelectedValue.indexOf(" "));
+                String URL = "http://amigo.geneontology.org/amigo/term/" + SelectedValue.substring(0, SelectedValue.indexOf(" "));
                 try {
                     URI uri = new URI(URL);
                     desktop.browse(uri);
@@ -98,25 +90,21 @@ public class NodeResultsPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_GoTermListMouseClicked
 
-    public void updateView(GeneInput gene){
+    public void showGeneDetails(GeneInput gene, Ontology ontology) {
         GeneLabel.setText(gene.getName());
+        
         GOTerm selectedGOTerm = gene.getSelectedGOTerm();
-        List<GOTerm> goTerms;
-        goTerms = new ArrayList<GOTerm>(gene.getGoTerms(ontology));
-        goTermsDisplayList = new String[goTerms.size()];
+        List<GOTerm> goTerms = new ArrayList<GOTerm>(gene.getGoTerms(ontology));
+        final String[] goTermsDisplayList = new String[goTerms.size()];
         goTerms.remove(selectedGOTerm);
         goTermsDisplayList[0] = selectedGOTerm.getName() + " " + selectedGOTerm.getDescription();
-        cont = 1;
-        for (GOTerm goTerm : goTerms){
-            String element = goTerm.getName() + " " + goTerm.getDescription();
-            if (!(Arrays.asList(goTermsDisplayList)).contains(element))
-            {
-                goTermsDisplayList[cont] = element;
-                cont++;
-            }
+        int i = 1;
+        for (GOTerm goTerm : goTerms) {
+            goTermsDisplayList[i] = goTerm.getName() + " " + goTerm.getDescription();
+            i++;
         }
         GoTermList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = Arrays.copyOfRange(goTermsDisplayList, 0, cont);
+            String[] strings = goTermsDisplayList;
             @Override
             public int getSize() { return strings.length; }
             @Override
@@ -129,7 +117,7 @@ public class NodeResultsPanel extends javax.swing.JPanel {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
         {
             Component c = super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
-            if (index == 0 && list.getSelectedIndex() != 0){
+            if (index == 0 && list.getSelectedIndex() != 0) {
                 c.setBackground(Color.lightGray);
             }
             return c;

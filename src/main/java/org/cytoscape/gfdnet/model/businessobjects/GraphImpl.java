@@ -1,6 +1,5 @@
 package org.cytoscape.gfdnet.model.businessobjects;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class GraphImpl<T> implements Graph<T>{
      * @param n number of nodes of the graph
      */
     public GraphImpl (int n) {
-        if (n <= 0){
+        if (n <= 0) {
             throw new IllegalArgumentException("The graph should contains at least one node.");
         }
         this.nodes =(T[]) new Object[n];
@@ -55,7 +54,7 @@ public class GraphImpl<T> implements Graph<T>{
      * @throws IllegalArgumentException if the specified index doesn't exist
      */
     @Override
-    public T getNode(int i){
+    public T getNode(int i) {
         assertNodeExist(i);
         return nodes[i];
     }
@@ -86,7 +85,7 @@ public class GraphImpl<T> implements Graph<T>{
     @Override
     public boolean areConnected(int i, int j) {
         assertNodesExist(i,j);
-        if (i>j){
+        if (i>j) {
             int aux = j;
             j = i;
             i = aux;
@@ -97,12 +96,12 @@ public class GraphImpl<T> implements Graph<T>{
     @Override
     public void setEdgeWeight(int i, int j, double weight) {
         assertNodesExist(i,j);
-        if (i>j){
+        if (i>j) {
             int aux = j;
             j = i;
             i = aux;
         } 
-        if (this.adjMat[i][j-i-1] == -1){
+        if (this.adjMat[i][j-i-1] == -1) {
             throw new IllegalArgumentException("The nodes are not joined by an edge.");
         }
         this.adjMat[i][j-i-1] = weight;
@@ -121,7 +120,7 @@ public class GraphImpl<T> implements Graph<T>{
     @Override
     public double getEdgeWeight(int i, int j) {
         assertNodesExist(i,j);
-        if (i>j){
+        if (i>j) {
             int aux = j;
             j = i;
             i = aux;
@@ -140,7 +139,7 @@ public class GraphImpl<T> implements Graph<T>{
     @Override
     public void addEdge(int i, int j, double weight) {
         assertNodesExist(i,j);
-        if (i>j){
+        if (i>j) {
             int aux = j;
             j = i;
             i = aux;
@@ -162,7 +161,7 @@ public class GraphImpl<T> implements Graph<T>{
             assertNodeExist(i);
             assertNodeExist(j);
         }
-        catch (IllegalArgumentException ex){
+        catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("The nodes should exist.");
         }
     }

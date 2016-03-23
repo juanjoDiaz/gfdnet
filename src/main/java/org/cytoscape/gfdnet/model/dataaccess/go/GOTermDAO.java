@@ -8,7 +8,7 @@ import java.util.Set;
 import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.dataaccess.DBCache;
-import org.cytoscape.gfdnet.model.dataaccess.DataBase;
+import org.cytoscape.gfdnet.model.dataaccess.Database;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
@@ -20,8 +20,8 @@ public class GOTermDAO {
     private static PreparedStatement getGoTermsStatement = null;
     
     public static PreparedStatement getPrepareGetGoTermsStatement() {
-        if (getGoTermsStatement == null || DataBase.isPreparedStatementClosed(getGoTermsStatement)) {
-            getGoTermsStatement = DataBase.getPreparedStatement(
+        if (getGoTermsStatement == null || Database.isPreparedStatementClosed(getGoTermsStatement)) {
+            getGoTermsStatement = Database.getPreparedStatement(
                     "SELECT term.id, name, acc " +
                     "FROM term, association " +
                     "WHERE association.term_id = term.id " +
@@ -35,7 +35,7 @@ public class GOTermDAO {
 
     public static Set<GOTerm> getGoTerms(int geneProductId, Ontology ontology) {      
         Object[] queryParams = {geneProductId, ontology.getDBString()};
-        ResultSet rs = DataBase.executePreparedStatement(getPrepareGetGoTermsStatement(), queryParams);
+        ResultSet rs = Database.executePreparedStatement(getPrepareGetGoTermsStatement(), queryParams);
         
         Set<GOTerm> goTerms = new HashSet(32, 1);
         try {
@@ -45,9 +45,9 @@ public class GOTermDAO {
                 goTerms.add(goTerm);
             }
         } catch (SQLException e) {
-            DataBase.logReadResultException("Error while retrieving GOTerms from the database.", e);
+            Database.logReadResultException("Error while retrieving GOTerms from the database.", e);
         } finally {
-            DataBase.closeResultSet(rs);
+            Database.closeResultSet(rs);
         }
         
         return goTerms;

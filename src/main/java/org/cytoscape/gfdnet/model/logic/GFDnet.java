@@ -1,14 +1,17 @@
 package org.cytoscape.gfdnet.model.logic;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
+import org.cytoscape.gfdnet.model.businessobjects.GOTree;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
+import org.cytoscape.gfdnet.model.businessobjects.GenesSearchResult;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
 import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
-import org.cytoscape.gfdnet.model.dataaccess.DataBase;
+import org.cytoscape.gfdnet.model.dataaccess.Database;
 import org.cytoscape.gfdnet.model.logic.utils.GOUtils;
 
 /**
@@ -19,7 +22,7 @@ public abstract class GFDnet {
     protected ProgressMonitor pm;
     protected boolean isInterrupted = false;
     
-    public GFDnet(ProgressMonitor pm){
+    public GFDnet(ProgressMonitor pm) {
         this.pm = pm;
     }
     
@@ -41,9 +44,9 @@ public abstract class GFDnet {
      * @param version version of the algorithm to be run (soon to be changed) 
      * @return the result object that contains all the information retrieved
      */
-    public GFDnetResult evaluateGeneNames(Graph<String> network, String genus, String species, String ontologyName, int version){
+    public GFDnetResult evaluateGeneNames(Graph<String> network, String genus, String species, String ontologyName, int version) {
         Organism organism = new Organism(genus, species);
-        if (!organism.isValid()){
+        if (!organism.isValid()) {
             throw new IllegalArgumentException("The organism cannot be recognised");
         }
         Ontology ontology;
@@ -65,46 +68,74 @@ public abstract class GFDnet {
      * @param version version of the algorithm to be run (soon to be changed) 
      * @return the result object that contains all the information retrieved
      */
-    public GFDnetResult evaluateGeneNames(Graph<String> network, Organism organism, Ontology ontology, int version){
+    public GFDnetResult evaluateGeneNames(Graph<String> network, Organism organism, Ontology ontology, int version) {
         if (version < 1 && version > 3) {
             throw new IllegalArgumentException("Wrong version of GFD-Net");
         }
         
-        DataBase.openConnection();
-        this.pm.setStatus("Retrieving genes from GO");
+        Database.openConnection();
+        pm.setStatus("Retrieving genes from GO");
         List<String> nodes = network.getNodes();
+        GenesSearchResult genesSearchResult = organism.getGenes(nodes);
+        List<GeneInput> genes = genesSearchResult.found;
+        List<String> unknownGenes = genesSearchResult.unknown;
         
-        List<GeneInput> genes = organism.getGenes(nodes);
-        List<GeneInput> genesToRemove = new LinkedList<GeneInput>();
-        for(GeneInput gene : genes){
+        pm.setStatus("Retrieving gene annotations");
+        List<GeneInput> unannotatedGenes = new LinkedList<GeneInput>();
+        Iterator<GeneInput> genesItr = genes.iterator();
+        while(genesItr.hasNext()) {
+           GeneInput gene = genesItr.next();
             if (isInterrupted) {
-                DataBase.closeConnection();
+                Database.closeConnection();
                 return null;
             }
-            if(!gene.isKnown(ontology)){
-                genesToRemove.add(gene);
+            pm.setStatus("Retrieving gene annotations (" + gene.getName() + ")");
+            if(!gene.isAnnotated(ontology)) {
+                unannotatedGenes.add(gene);
+                genesItr.remove();
             }
+            gene.clearGOTerm();
         }
-        DataBase.closeConnection();
-        genes.removeAll(genesToRemove);
+        Database.closeConnection();
+        
+        if (isInterrupted) {
+            return null;
+        }
         
         if (genes.isEmpty()) {
             throw new IllegalArgumentException("There isn't any gene in the network that is annotated in the selected ontology.");
         }
         
+        pm.setStatus("Annotating the network");
         Graph<GeneInput> geneInputsNetwork = GOUtils.getGenInputNetwork(network, genes);
 
-        for (GeneInput gene : geneInputsNetwork.getNodes()){
-            gene.clearGOTerm();
-        }
-        this.pm.setStatus("Analyzing the network");
-        GFDnetResult result = evaluateGenes(geneInputsNetwork, ontology, version);
         if (isInterrupted) {
             return null;
         }
+        
+        pm.setStatus("Building the GO-Tree");
+        GOTree goTree = new GOTree(geneInputsNetwork.getNodes(), ontology);
+        
+        if (isInterrupted) {
+            return null;
+        }
+
+        pm.setStatus("Analyzing the network");
+        GFDnetResult result = evaluateGenes(geneInputsNetwork, goTree, organism, ontology, version);
+        result.setUnkownGenes(unknownGenes);
+        result.setUnannotatednGenes(unannotatedGenes);
+        return result;
+    }
+    
+    public GFDnetResult evaluateGenes(Graph<GeneInput> network, GOTree goTree, Organism organism, Ontology ontology, int version) {
+        for (GeneInput gene : network.getNodes()) {
+            gene.clearGOTerm();
+        }
+        GFDnetResult result = evaluateGenes(goTree, network, version);
+        result.setOntology(ontology);
         result.setOrganism(organism);
         return result;
     }
     
-    public abstract GFDnetResult evaluateGenes(Graph<GeneInput> network, Ontology ontology, int version);
+    protected abstract GFDnetResult evaluateGenes(GOTree goTree, Graph<GeneInput> network, int version);
 }

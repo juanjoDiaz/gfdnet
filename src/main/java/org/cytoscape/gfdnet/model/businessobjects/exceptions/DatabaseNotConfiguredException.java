@@ -4,7 +4,7 @@ package org.cytoscape.gfdnet.model.businessobjects.exceptions;
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>
  * @author Juan José Díaz Montaña
  */
-public class DataBaseException extends RuntimeException {
+public class DatabaseNotConfiguredException extends RuntimeException {
     
     /**
      * This field holds the exception ex if the
@@ -15,22 +15,22 @@ public class DataBaseException extends RuntimeException {
      */
     private final Throwable ex;
     
-    private static final String DefaultMessage = "Something went wrong querying the database.\nPlease check that you are using a valid GO database.";
+    private static final String DefaultMessage = "Database hasn't ben configured.";
   
     /**
-     * Constructs a <code>DataBaseException</code> with the
+     * Constructs a <code>DatabaseNotConfiguredException</code> with the
      * default detail message and optional exception that was
      * raised while loading the class.
      *
      * @param ex the exception that was raised while loading the class
      * @since 1.2
      */
-    public DataBaseException(Throwable ex) {
+    public DatabaseNotConfiguredException() {
         this(DefaultMessage, null);
     }
     
     /**
-     * Constructs a <code>DataBaseException</code> with the
+     * Constructs a <code>DatabaseNotConfiguredException</code> with the
      * specified detail message and optional exception that was
      * raised while loading the class.
      *
@@ -38,7 +38,7 @@ public class DataBaseException extends RuntimeException {
      * @param ex the exception that was raised while loading the class
      * @since 1.2
      */
-    public DataBaseException(String s, Throwable ex) {
+    public DatabaseNotConfiguredException(String s, Throwable ex) {
         super(s, null);  //  Disallow initCause
         this.ex = ex;
     }

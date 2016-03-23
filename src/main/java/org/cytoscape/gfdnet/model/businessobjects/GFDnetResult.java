@@ -10,98 +10,66 @@ import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
  * @author Juan José Díaz Montaña
  */
 public class GFDnetResult {
-    /**
-     * Ontology used
-     */
-    private final Ontology ontology;
-    
-    /**
-     * Organism used
-     */
-    private Organism organism;
-    
-    /**
-     * Central Node
-     */
-    private final GOTerm centralNode;
-    
-    /**
-     * Numerical result
-     */
-    private final double similarity;
-    
-    /**
-     * A graph where the nodes are the genes showing the interactions between them
-     */
-    private final Graph<GeneInput> network;
 
-    /**
-     *
-     * @param ontology
-     * @param similarity
-     * @param centralNode
-     * @param network
-     */
-    public GFDnetResult(Ontology ontology, double similarity, GOTerm centralNode, Graph<GeneInput> network) {
-        this.ontology = ontology;
+    private final double similarity;
+    private final GOTerm centralNode;
+    private final Graph<GeneInput> network;
+    private List<String> unknownGenes;
+    private List<GeneInput> unannotatedGenes;
+    private Ontology ontology;
+    private Organism organism;
+
+    public GFDnetResult(double similarity, GOTerm centralNode, Graph<GeneInput> network) {
         this.similarity = similarity;
         this.centralNode = centralNode;
         this.network = network;
     }
-
-    /**
-     *
-     * @return the ontology
-     */
-    public Ontology getOntology() {
-        return ontology;
-    }
-    
-    /**
-     *
-     * @return the organism
-     */
-    public Organism getOrganism() {
-        return organism;
-    }
-    
-    /**
-     *
-     * @param organism
-     */
-    public void setOrganism(Organism organism) {
-        this.organism = organism;
-    }
-   
-    /**
-     *
-     * @return the similarity value
-     */
+     
     public double getSimilarity() {
         return similarity;
     }
-    
-    /**
-     *
-     * @return the central node
-     */
+
     public GOTerm getCentralNode() {
         return centralNode;
     }
-
-    /**
-     *
-     * @return the net with all the information of GFD
-     */
-    public Graph<GeneInput> getNetwork(){
+    
+    public Graph<GeneInput> getNetwork() {
         return network;
     }
     
-    /**
-     *
-     * @return a list of the genes in the net
-     */
-    public List<GeneInput> getKownGenes(){
+    public List<GeneInput> getAnalyzedGenes() {
         return network.getNodes();
+    }
+
+    public void setUnkownGenes(List<String> unknownGenes) {
+        this.unknownGenes = unknownGenes;
+    }
+    
+    public List<String> getUnkownGenes() {
+        return this.unknownGenes;
+    }
+    
+    public void setUnannotatednGenes(List<GeneInput> unannotatedGenes) {
+        this.unannotatedGenes = unannotatedGenes;
+    }
+    
+    public List<GeneInput> getUnannotatednGenes() {
+        return this.unannotatedGenes;
+    }
+
+    public void setOntology(Ontology ontology) {
+        this.ontology = ontology;
+    }
+    
+    public Ontology getOntology() {
+        return ontology;
+    }
+
+    public Organism getOrganism() {
+        return organism;
+    }
+
+    public void setOrganism(Organism organism) {
+        this.organism = organism;
     }
 }
