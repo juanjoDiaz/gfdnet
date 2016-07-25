@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.businessobjects.utils.Cache;
 

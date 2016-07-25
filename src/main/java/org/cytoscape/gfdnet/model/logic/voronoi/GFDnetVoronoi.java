@@ -57,6 +57,7 @@ public class GFDnetVoronoi extends GFDnet {
     @Override
     protected GFDnetResult evaluateGenes(GOTree goTree, Graph<GeneInput> network, int version) {
         Set<GOTreeNode> nodesIterator = goTree.getNodes();
+        goTreeSize = nodesIterator.size();
         if (threads == 1) {
             for (GOTreeNode centralNode : nodesIterator) {
                 ThreadResult result = new GFDnetVoronoiThread(network, goTree, centralNode, version).call();

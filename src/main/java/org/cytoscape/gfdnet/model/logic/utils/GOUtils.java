@@ -25,7 +25,7 @@ public class GOUtils {
         Map<String, Integer> nodesMap = new HashMap<String, Integer>(nodes.size());
         int i = 0;
         for (String nodeName : nodes) {
-            nodesMap.put(nodeName, i);
+            nodesMap.put(nodeName.toUpperCase(), i);
             i++;
         }
 

@@ -1,7 +1,7 @@
 package org.cytoscape.gfdnet.model.logic;
 
 import java.util.Set;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.utils.ProgressMonitor;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;

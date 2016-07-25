@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.cytoscape.gfdnet.controller.ResultPanelController;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 

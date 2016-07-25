@@ -3,7 +3,7 @@ package org.cytoscape.gfdnet.model.logic;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.GOTree;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
@@ -33,6 +33,7 @@ public abstract class GFDnet {
     public boolean isInterrupted() {
         return isInterrupted;
     }
+    
     /**
      * Returns the result object that contains all the information retrieved
      * by the GFD-Net approximation.
@@ -69,10 +70,6 @@ public abstract class GFDnet {
      * @return the result object that contains all the information retrieved
      */
     public GFDnetResult evaluateGeneNames(Graph<String> network, Organism organism, Ontology ontology, int version) {
-        if (version < 1 && version > 3) {
-            throw new IllegalArgumentException("Wrong version of GFD-Net");
-        }
-        
         Database.openConnection();
         pm.setStatus("Retrieving genes from GO");
         List<String> nodes = network.getNodes();
@@ -128,6 +125,9 @@ public abstract class GFDnet {
     }
     
     public GFDnetResult evaluateGenes(Graph<GeneInput> network, GOTree goTree, Organism organism, Ontology ontology, int version) {
+        if (version < 1 && version > 3) {
+            throw new IllegalArgumentException("Wrong version of GFD-Net");
+        }
         for (GeneInput gene : network.getNodes()) {
             gene.clearGOTerm();
         }

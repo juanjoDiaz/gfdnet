@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,8 +61,8 @@ public class Gene implements Comparable {
     
     public Set<GOTerm> getGoTerms(Ontology ontology) {
         if (loadedOntology != ontology) {
+            goTerms.clear();
             for(GeneProduct geneProduct : geneProducts) {
-                goTerms.clear();
                 goTerms.addAll(geneProduct.getGoTerms(ontology));
             }
             loadedOntology = ontology;

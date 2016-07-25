@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
-import org.cytoscape.gfdnet.model.businessobjects.Enums.RelationshipType;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.RelationshipType;
 
 /**
  * @license Apache License V2 <http://www.apache.org/licenses/LICENSE-2.0.html>

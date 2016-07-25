@@ -10,7 +10,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.cytoscape.gfdnet.controller.tasks.ExecuteGFDnetTask;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.exceptions.DatabaseException;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;
 import org.cytoscape.gfdnet.model.dataaccess.Database;
@@ -22,7 +22,7 @@ import org.cytoscape.work.TaskManager;
  * @author Juan José Díaz Montaña
  */
 public class ConfigurationDialog extends javax.swing.JDialog {
-    private TaskManager taskManager;
+    private final TaskManager taskManager;
     private final String[] commonOrganisms = { "Arabidopsis thaliana", "Caenorhabditis elegans",
                 "Danio rerio", "Dictyostelium discoideum", "Drosophila melanogaster",
                 "Escherichia coli", "Gallus gallus", "Homo sapiens", "Mus musculus",

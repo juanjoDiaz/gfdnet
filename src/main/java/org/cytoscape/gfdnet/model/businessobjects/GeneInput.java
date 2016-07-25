@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.model.businessobjects;
 
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.go.GOTerm;
 import org.cytoscape.gfdnet.model.businessobjects.go.Gene;
 

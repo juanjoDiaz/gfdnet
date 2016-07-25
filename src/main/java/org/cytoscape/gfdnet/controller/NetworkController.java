@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.gfdnet.controller.utils.NetworkAdapter;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.GeneInput;
 import org.cytoscape.gfdnet.model.businessobjects.Graph;
@@ -86,7 +86,7 @@ public final class NetworkController {
         addNodeInfo(result);
         addEdgeInfo(result.getNetwork());
         if (networkView != null) {
-            applyVisualStyle();
+//            TODO Fix applyVisualStyle();
         }
     }
     
@@ -222,14 +222,13 @@ public final class NetworkController {
                         if((sourceName.equalsIgnoreCase(n1) && targetName.equalsIgnoreCase(n2)) ||
                                 (sourceName.equalsIgnoreCase(n2) && targetName.equalsIgnoreCase(n1))) {
                             edgeTable.getRow(edge.getSUID()).set(DissimilairtyColumn, weight);
+                            Object[] row = new Object[3];
+                            row[0] = sourceName;
+                            row[1] = targetName;
+                            row[2] = weight;
+                            relationshipList.add(row);
                             break;
                         }
-
-                        Object[] row = new Object[3];
-                        row[0] = sourceName;
-                        row[1] = targetName;
-                        row[2] = weight;
-                        relationshipList.add(row);
                     }
                 }
             }

@@ -87,16 +87,12 @@ public class Database {
                 openedStatements = new LinkedList<Statement>();
             }
         } catch (ClassNotFoundException ex) {
-            System.out.println(Errors.DriverNotFound.getMessage());
             throw new DatabaseException(Errors.DriverNotFound.getMessage(), ex);
         } catch (SQLException ex) {
-            System.out.println(Errors.ConnetionFailed.getMessage());
             throw new DatabaseException(Errors.ConnetionFailed.getMessage(), ex);
         } catch (InstantiationException ex) {
-            System.out.println(Errors.OpenConnectionFailed.getMessage());
             throw new DatabaseException(Errors.OpenConnectionFailed.getMessage(), ex);
         } catch (IllegalAccessException ex) {
-            System.out.println(Errors.OpenConnectionFailed.getMessage());
             throw new DatabaseException(Errors.OpenConnectionFailed.getMessage(), ex);
         }
     }
@@ -112,8 +108,7 @@ public class Database {
                 connection = null;
             }
         } catch (SQLException ex) {
-            System.out.println(Errors.CloseConnectionFailed.getMessage());
-            throw new DatabaseException(ex);
+            throw new DatabaseException(Errors.CloseConnectionFailed.getMessage(), ex);
         }
     }
     
@@ -123,8 +118,8 @@ public class Database {
             stm = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             openedStatements.add(stm);
         } catch (SQLException ex) {
-            System.out.println(Errors.PrepareStatementFailed.getMessage());
-            throw new DatabaseException(ex);
+            closeConnection();
+            throw new DatabaseException(Errors.PrepareStatementFailed.getMessage(), ex);
         }
         return stm;
     }
@@ -133,8 +128,8 @@ public class Database {
         try {
             return stm.isClosed();
         } catch (SQLException ex) {
-            System.out.println(Errors.PrepareStatementIsCloseFailed.getMessage());
-            throw new DatabaseException(ex);
+            closeConnection();
+            throw new DatabaseException(Errors.PrepareStatementIsCloseFailed.getMessage(), ex);
         }
     }
     
@@ -152,8 +147,8 @@ public class Database {
             }
             rs = stm.executeQuery();
         } catch (SQLException ex) {
-            System.out.println(Errors.ExecuteQueryFailed.getMessage());
-            throw new DatabaseException(ex);
+            closeConnection();
+            throw new DatabaseException(Errors.ExecuteQueryFailed.getMessage(), ex);
         }
         return rs;
     }
@@ -162,7 +157,7 @@ public class Database {
         try {
             rs.close();
         } catch (SQLException ex) {
-            System.out.println(Errors.CloseResultSetFailed.getMessage());
+            closeConnection();
             throw new DatabaseException(Errors.CloseResultSetFailed.getMessage(), ex);
         }
     }
@@ -179,14 +174,14 @@ public class Database {
             Statement statement = connection.createStatement();
             rs = statement.executeQuery(sql);
         } catch (SQLException ex) {
-            System.out.println(Errors.ExecuteQueryFailed.getMessage() + "\n" + sql);
+            closeConnection();
             throw new DatabaseException(Errors.ExecuteQueryFailed.getMessage(), ex);
         }
         return rs;
     }
     
     public static void logReadResultException(String message, SQLException ex) {
-        System.out.println(message);
+        closeConnection();
         throw new DatabaseException(message, ex);
     }
     
@@ -196,8 +191,8 @@ public class Database {
             rs.close();
             stm.close();
         } catch (SQLException ex) {
-            System.out.println(Errors.CloseQueryFailed.getMessage());
-            throw new DatabaseException(ex);
+            closeConnection();
+            throw new DatabaseException(Errors.CloseQueryFailed.getMessage(), ex);
         }
     }
 }

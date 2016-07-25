@@ -4,7 +4,7 @@ import org.cytoscape.gfdnet.controller.NetworkController;
 import org.cytoscape.gfdnet.controller.ResultPanelController;
 import org.cytoscape.gfdnet.controller.utils.CySwing;
 import org.cytoscape.gfdnet.controller.utils.CytoscapeTaskMonitor;
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import org.cytoscape.gfdnet.model.businessobjects.GFDnetResult;
 import org.cytoscape.gfdnet.model.businessobjects.exceptions.DatabaseException;
 import org.cytoscape.gfdnet.model.businessobjects.go.Organism;

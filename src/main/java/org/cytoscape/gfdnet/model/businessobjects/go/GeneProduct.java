@@ -1,6 +1,6 @@
 package org.cytoscape.gfdnet.model.businessobjects.go;
 
-import org.cytoscape.gfdnet.model.businessobjects.Enums.Ontology;
+import org.cytoscape.gfdnet.model.businessobjects.go.Enums.Ontology;
 import java.util.Collections;
 import java.util.Set;
 import org.cytoscape.gfdnet.model.dataaccess.go.GOTermDAO;
@@ -47,7 +47,7 @@ public class GeneProduct implements Comparable {
             return false;
         }
         final GeneProduct other = (GeneProduct) obj;
-        return !((this.id == null) ? (other.id != null) : !this.id.equals(other.id));
+        return this.id.equals(other.id);
     }
 
     @Override
