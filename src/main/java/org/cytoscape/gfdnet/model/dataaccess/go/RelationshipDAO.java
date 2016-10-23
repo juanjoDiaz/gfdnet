@@ -32,7 +32,7 @@ public class RelationshipDAO {
                         "AND (SELECT name FROM term t2, term2term t2t2 " +
                             "WHERE t2.id = t2t2.relationship_type_id " +
                                 "AND t2t2.id = t2t.id) IN ('" + RelationshipType.is_a.getDBString() + "', '" +
-                                    RelationshipType.part_of.getDBString() + "', '" + RelationshipType.occurs_in.getDBString() + "')" +
+                                    RelationshipType.part_of.getDBString() + "', '" + RelationshipType.occurs_in.getDBString() + "') " +
                         "AND t2t.term2_id = ? " +
                         "AND t.term_type = ?;");
         }
