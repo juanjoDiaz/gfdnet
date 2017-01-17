@@ -13,7 +13,7 @@ After the analysis, users can visualize the information retrieved from GO.
 Version
 ----
 
-1.4.0
+1.4.1
 
 License
 ----
