@@ -138,7 +138,7 @@ public final class NetworkController {
             // Do nothing and just override the values in the collumn
         }
         
-        geneRows = new Object[result.getAnalyzedGenes().size()][3];
+        geneRows = new Object[result.getAnalyzedGenes().size() + result.getUnkownGenes().size() + result.getUnannotatednGenes().size()][3];
         int i = 0;
         for (GeneInput gene : result.getAnalyzedGenes()) {
             for(CyRow row : nodeTable.getAllRows()) {
