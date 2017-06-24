@@ -31,6 +31,10 @@ public class ResultPanelController {
         rv = new MainResultsView(this);
         CySwing.addPanel(rv);
         
+        if(panels.containsKey(network.getCyNetwork())) {
+            CySwing.removePanel(panels.get(network.getCyNetwork()).rv);
+        }
+        
         panels.put(network.getCyNetwork(), this);
     }
     
