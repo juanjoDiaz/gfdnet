@@ -151,7 +151,7 @@ public class GraphImpl<T> implements Graph<T>{
     }
     
     private void assertNodeExist(int i) {
-        if (i < 0 && i >= nodes.length ) {
+        if (i < 0 || i >= nodes.length) {
             throw new IllegalArgumentException("Node doesn't exist.");
         }
     }
@@ -160,8 +160,7 @@ public class GraphImpl<T> implements Graph<T>{
         try {
             assertNodeExist(i);
             assertNodeExist(j);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("The nodes should exist.");
         }
     }
