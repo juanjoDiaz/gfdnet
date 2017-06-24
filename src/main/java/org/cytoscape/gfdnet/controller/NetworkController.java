@@ -238,7 +238,7 @@ public final class NetworkController {
 
     private void applyVisualStyle() {
         for (VisualStyle style : visualMappingManager.getAllVisualStyles()) {
-            if (style.getTitle().equals("GFD-Net Style")) {
+            if (style.getTitle().equals("GFD-Net")) {
                 style.apply(networkView);
                 break;
             }

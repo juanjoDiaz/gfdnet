@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <vizmap documentVersion="3.0" id="VizMap-2015_11_09-00_28">
-    <visualStyle name="GFD-Net Style">
+    <visualStyle name="GFD-Net">
         <network>
             <visualProperty name="NETWORK_HEIGHT" default="400.0"/>
             <visualProperty name="NETWORK_CENTER_Y_LOCATION" default="0.0"/>

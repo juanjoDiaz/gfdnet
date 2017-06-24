@@ -26,7 +26,7 @@ public class ImportGFDNetVisualStylesTask extends AbstractTask {
     @Override
     public void run(final TaskMonitor taskMonitor) throws Exception {
         for (VisualStyle style : visualMappingManager.getAllVisualStyles()) {
-            if (style.getTitle().equals(GFDNET_VIZMAP_FILE)) {
+            if (style.getTitle().equals("GFD-Net")) {
                 return;
             }
         }
@@ -45,7 +45,7 @@ public class ImportGFDNetVisualStylesTask extends AbstractTask {
         private final VizmapReader reader;
 
         public AddVisualStylesTask(final VizmapReader reader) {
-                this.reader = reader;
+            this.reader = reader;
         }
 
         @Override
