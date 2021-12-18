@@ -6,7 +6,7 @@
 
     <groupId>org.cytoscape.gfdnet</groupId>
     <artifactId>gfdnet</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <packaging>bundle</packaging>
 
     <name>GFD-Net</name>
